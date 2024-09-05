@@ -6,36 +6,16 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdlib.h>
 #include <string.h>
-
-const char* fontPath = "FreeMono.ttf";
-
-int set=-1;
-
-// Define constants for text styles
-const int NORMAL = TTF_STYLE_NORMAL;
-const int BOLD = TTF_STYLE_BOLD;
-const int ITALIC = TTF_STYLE_ITALIC;
-const int UNDERLINE = TTF_STYLE_UNDERLINE;
-const int STRIKETHROUGH = TTF_STYLE_STRIKETHROUGH;
-
-// Define a structure to hold text properties
-typedef struct {
-    const char *text;
-    int x;
-    int y;
-    int fontSize;
-    Color color; // Color struct and constants already in backend.h
-    int style;   // Text style (NORMAL, BOLD, etc.)
-} TEXT;
+#include"create.h"
 
 
 
 // Function to initialize Text with default values
-TEXT write(const char *text, int x, int y, int fontSize, Color color, int style) {
+CREATE text(const char *text, int x, int y, int fontSize, Color color, int style) {
     // Update window size automatically
     updateWindowSize();
 
-    TEXT newText;
+    CREATE newText;
     newText.text = text;
     newText.fontSize = fontSize;
     newText.color = color;
@@ -61,7 +41,7 @@ TEXT write(const char *text, int x, int y, int fontSize, Color color, int style)
 }
 
 // Function to render text based on the Text structure
-int renderText(const TEXT *textProps) {
+int renderText(const CREATE *textProps) {
     // Load font
     TTF_Font *font = TTF_OpenFont(fontPath, textProps->fontSize);
     if (!font) {
@@ -102,8 +82,8 @@ int renderText(const TEXT *textProps) {
 
     return 0;
 }
-/* example 1
 
+/* //example 1
 int main() {
     if (!init("Gui", 500, 500)) {
         printf("Failed to initialize!\n");
@@ -111,7 +91,7 @@ int main() {
     }
 
     // Initialize Text properties with style
-    TEXT props = write("Hello, World!", -1, -1, 16, RED, NORMAL);
+    CREATE props = text("Hello, World!", -1, -1, 16, RED, NORMAL);
 
     // Modify properties if needed
     props.color = GREEN; // Change the color to GREEN
@@ -121,7 +101,7 @@ int main() {
     renderText(&props);
     
     // Add another text with auto alignment
-    TEXT text2 = write("Auto align instead of x and y like ImGui", -1, -1, 16, RED, NORMAL);
+    CREATE text2 = text("Auto align instead of x and y like ImGui", -1, -1, 16, RED, NORMAL);
     renderText(&text2);
 
     // Present the rendered output
@@ -131,12 +111,50 @@ int main() {
     terminate();
     return 0;
 }
-
 */
 
-/* example 2
 
+//example 2
 
+typedef struct {
+    int x; // X position
+    int y; // Y position
+    int width; // Width of the text box
+    int height; // Height of the text box
+    Color color; // Background color
+    Color outlineColor; // Border color
+    int outlineThickness; // Border thickness
+    char text[256]; // Text content (max length 255 characters)
+    int cursorPos; // Position of the cursor in the text
+    bool active; // Whether the text box is currently active (focused)
+} TextBox;
+
+TextBox create_text_box(int x, int y, int width, int height, Color color, Color outlineColor) {
+    TextBox newTextBox;
+    newTextBox.x = x;
+    newTextBox.y = y;
+    newTextBox.width = width;
+    newTextBox.height = height;
+    newTextBox.color = color;
+    newTextBox.outlineColor = outlineColor;
+    newTextBox.outlineThickness = 2; // Default thickness
+    newTextBox.text[0] = '\0'; // Start with empty text
+    newTextBox.cursorPos = 0; // Start cursor at the beginning
+    newTextBox.active = false; // Not focused by default
+    return newTextBox;
+}
+
+void render_text_box(TextBox *textBox) {
+    // Draw the background rectangle
+    draw_rectangle(textBox->color, textBox->width, textBox->height, textBox->x, textBox->y, FILLED);
+
+    // Draw the outline (border)
+    draw_rectangle(textBox->outlineColor, textBox->width, textBox->height, textBox->x, textBox->y, OUTLINE);
+
+    // Render the text inside the text box
+    CREATE textProps = text(textBox->text, textBox->x + 5, textBox->y + 5, 16, BLACK, NORMAL); // Example using black color and normal style
+    renderText(&textProps);
+}
 
 int main() {
     if (!init("Gui", 500, 500)) {
@@ -145,7 +163,7 @@ int main() {
     }
 
     // Initialize Text properties with style
-    TEXT props = write("Hello, World!", 100, 150, 16, RED, NORMAL);
+    CREATE props = text("Hello, World!", 100, 150, 16, RED, NORMAL);
 
     // Modify properties if needed
     props.color = GREEN; // Change the color to GREEN
@@ -153,8 +171,11 @@ int main() {
 
     // Render the text with the modified properties
     renderText(&props);
-    TEXT text2=write("auto align instead of x and y like imgui",set,set,16,RED,NORMAL);
+    CREATE text2=text("auto align instead of x and y like imgui",set,set,16,RED,NORMAL);
     renderText(&text2);
+    TextBox boxy=create_text_box(299, 200, 50, 50, WHITE, RED);
+    
+render_text_box(&boxy);
     present();
     SDL_Delay(3000); // Delay to view the result
     
@@ -162,4 +183,3 @@ int main() {
     return 0;
 }
 
-*/

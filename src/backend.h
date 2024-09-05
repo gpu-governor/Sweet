@@ -18,24 +18,25 @@ bool active = true; // so you can use while (active) { // SDL events }
 //  function to update the window size in the LayoutContext
 // Define the LayoutContext struct globally
 typedef struct {
-    int cursorX;       // Current X position
-    int cursorY;       // Current Y position
+    int cursor_x;       // Current X position
+    int cursor_y;       // Current Y position
     int padding;       // Padding between widgets
-    int windowWidth;   // Width of the window
-    int windowHeight;  // Height of the window
-} LayoutContext;
+    int window_width;   // Width of the window
+    int window_height;  // Height of the window
+} Layout_context;
 
 // Initialize the LayoutContext instance globally
-LayoutContext layoutContext = { .cursorX = 0, .cursorY = 0, .padding = 5, .windowWidth = 500, .windowHeight = 500 };
+Layout_context layout_context = { .cursor_x = 0, .cursor_y = 0, .padding = 5, .window_width = 500, .window_height = 500 };
 
  void updateWindowSize() {
-    SDL_GetWindowSize(win, &layoutContext.windowWidth, &layoutContext.windowHeight);
+    SDL_GetWindowSize(win, &layout_context.window_width, &layout_context.window_height);
 }
 
 //end layout context
 // =============INITIALIZATION, WINDOW, EVENTS===========================
 
 bool init(const char *title, int width, int height) {
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2"); // "2" for anisotropic filtering
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
         return false;
@@ -76,7 +77,7 @@ bool init(const char *title, int width, int height) {
     return true;
 }
 
-void terminate() {
+void quit() {
     if (ren) {
         SDL_DestroyRenderer(ren);
     }
@@ -87,36 +88,7 @@ void terminate() {
     IMG_Quit();
     SDL_Quit();
 }
-void handle_events() {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                active = false;
-                break;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    updateWindowSize();  // This will update the size automatically upon resizing
-                }
-                break;
-            // Handle other events here if needed
-            default:
-                break;
-        }
-    }
-}
 
-void debug() {
-    if (SDL_WasInit(SDL_INIT_EVERYTHING) == 0) {
-        printf("SDL is not initialized.\n");
-    }
-    if (win == NULL) {
-        printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
-    }
-    if (ren == NULL) {
-        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
-    }
-}
 
 // =============COLOR, DRAW (RECT, TRI, CIR), RENDER RELATED FUNCTIONS===========================
 
@@ -240,6 +212,29 @@ void present() {
     SDL_RenderPresent(ren);
 }
 
+// [[[[[EVENTS]]]]]
+void handle_events() {
+    
+    
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                active = false;
+                break;
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    updateWindowSize();  // This will update the size automatically upon resizing
+                }
+                break;
+            // Handle other events here if needed
+            default:
+                break;
+       	 }
+    	}
+    present();
+    while (active){} // pause the program (like SDL Delay)
+}
 // =============IMG, AUDIO LOAD===========================
 
 void load_img(const char *path) {
@@ -268,3 +263,4 @@ void load_img(const char *path) {
 void background(Color color){
 	clear_screen(color);
 }
+
