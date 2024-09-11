@@ -1,4 +1,3 @@
-#include "backend.h"
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -6,6 +5,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdlib.h>
 #include <string.h>
+// local includes
+#include "backend.h"
 #include"widgets.h"
 #include"state.h"
 int main() {

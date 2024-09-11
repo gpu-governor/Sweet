@@ -1,10 +1,8 @@
 // GLOBAL VARIABLES
 const char* font_path = "assets/FreeMono.ttf";
 int set = -1;
-	int hover=1, shadow=2,outline=3;
-/* In HTML, the default font sizes for heading elements (`h1`, `h2`, etc.) are typically defined relative to the browser's default font size, which is usually `16px`. Here's the approximate mapping of default heading sizes to pixel values in most browsers:
-*/
-
+int hover=1, shadow=2,outline=3;
+// In HTML, the default font sizes for heading elements (`h1`, `h2`, etc.) are typically defined relative to the browser's default font size, which is usually `16px`. Here's the approximate mapping of default heading sizes to pixel values in most browsers:
 int h1 =32, h2=24, h3=19,h4=16,h5= 13,h6=11;
 int p=16;
 // when using the text(), if users don't want to enter font size, the can use predefined html tags.
@@ -291,6 +289,7 @@ int render_button(const CREATE *button_properties) {
 
 //=================Forms============
 // forms and text area
-CREATE form(const char *place_holder ){
-	
+/*CREATE form(const char *place_holder ){
+	return;	
 }
+*/
