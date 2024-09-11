@@ -1,6 +1,6 @@
 # Variables
 COMPILER = g++
-SOURCE_FILE = showcase.cc
+SOURCE_FILE = temp.cpp
 OUTPUT_FILE = main
 SDL_LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf
 
