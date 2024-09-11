@@ -13,6 +13,7 @@
 // Global variables
 SDL_Window *win = NULL;
 SDL_Renderer *ren = NULL;
+SDL_Event event;
 bool active = true; // so you can use while (active) { // SDL events }
 // layout context
 //  function to update the window size in the LayoutContext
@@ -214,27 +215,32 @@ void present() {
 
 // [[[[[EVENTS]]]]]
 void handle_events() {
-    
-    
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                active = false;
-                break;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    updateWindowSize();  // This will update the size automatically upon resizing
+present();
+
+        while (active) {
+                    // Poll for events
+            while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                    case SDL_QUIT:
+                        active = false;  // User closed the window
+                        break;
+                    case SDL_WINDOWEVENT:
+                        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                            updateWindowSize();  // Resize event triggers window size update
+                        }
+                        break;
+                    // Add other event handling cases here if needed
+                    default:
+                        break;
                 }
-                break;
-            // Handle other events here if needed
-            default:
-                break;
-       	 }
-    	}
-    present();
-    while (active){} // pause the program (like SDL Delay)
-}
+            }
+            
+            // Render the updated frame
+          //  present();
+            // Optionally, handle frame logic, updating scene, etc.
+        }
+    }
+    
 // =============IMG, AUDIO LOAD===========================
 
 void load_img(const char *path) {
