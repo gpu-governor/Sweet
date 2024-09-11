@@ -6,7 +6,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdlib.h>
 #include <string.h>
-#include"widgits.h"
+#include"widgets.h"
 #include"state.h"
 void do_func(){} // to be removed later after click is functional
 
@@ -94,16 +94,19 @@ int main() {
 }
 */
 //=========================================
-// example 4: complex text
+// example 4: complex text and write
 int main() {
     if (!init("Gui", 500, 500)) {
         printf("Failed to initialize SDL!\n");
         return -1;
     }
     background(WHITE);
-
+	// complex text provide more control with more parameters
     CREATE header1=complex_text("this is H1 tag",set,set,h1,BLACK,NORMAL,1,(EFFECT){hover,BLUE});
 	render_text(&header1);
+	// write provides just font and text, but you can use .method to add other properties like color later
+	CREATE simpe_text=write(p,"blah, blah, ound(WHITE);complex text provide more control with more parameters, while write provides just font and text, but you can use .method to add other properties like color later");
+	render_text(&simpe_text);
     // Present the rendered output
     handle_events();
     quit();

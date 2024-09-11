@@ -1,9 +1,7 @@
 // GLOBAL VARIABLES
 const char* font_path = "assets/FreeMono.ttf";
 int set = -1;
-	int hover=1;
-	int shadow;
-	int outline;
+	int hover=1, shadow=2,outline=3;
 /* In HTML, the default font sizes for heading elements (`h1`, `h2`, etc.) are typically defined relative to the browser's default font size, which is usually `16px`. Here's the approximate mapping of default heading sizes to pixel values in most browsers:
 */
 
@@ -42,6 +40,9 @@ typedef struct {
     int outline_thickness; // Thickness of the button border
     int width;  // Width of the button
     int height; // Height of the button
+    
+    // text box specific
+    const char * place_holder;
 } CREATE;
 typedef struct{
 	int type;
@@ -155,6 +156,41 @@ CREATE complex_text(const char *text, int x, int y, int font_size, Color color, 
 
     return new_text;
 }
+//------------------------------------write-----------------------------
+CREATE write(int font_size,const char *text) {
+    // Update window size automatically
+    updateWindowSize();
+
+	//default values
+	Color color= BLACK;
+	int style= NORMAL;
+	int x=-1;
+	int y= -1; // set
+	
+    CREATE new_text;
+    new_text.text = text;
+    new_text.font_size = font_size;
+    new_text.color = color;
+    new_text.style = style;
+
+    // Handle auto positioning
+    if (x == -1) {  // -1 represents 'auto' for x
+        new_text.x = layout_context.cursor_x;
+    } else {
+        new_text.x = x;
+    }
+
+    if (y == -1) {  // -1 represents 'auto' for y
+        new_text.y = layout_context.cursor_y;
+    } else {
+        new_text.y = y;
+    }
+
+    // Update the layout context cursor for the next text
+    layout_context.cursor_y += font_size + layout_context.padding; // Move down by the height of the font and padding
+
+    return new_text;
+}
 
 
 //===================BUTTONS==================
@@ -251,4 +287,10 @@ int render_button(const CREATE *button_properties) {
     TTF_CloseFont(font);
 
     return 0;
+}
+
+//=================Forms============
+// forms and text area
+CREATE form(const char *place_holder ){
+	
 }
