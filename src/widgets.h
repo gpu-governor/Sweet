@@ -192,9 +192,9 @@ CREATE write(int font_size,const char *text) {
 }
 
 
-//===================BUTTONS==================
+//===============================BUTTONS============================================
 // Function to initialize Button with default values
-CREATE button(const char *text, int x, int y, int font_size, Color color, Color bcolor, Color outline_color, int style) {
+CREATE button(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
     // Update window size automatically
     updateWindowSize();
 
@@ -203,7 +203,6 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     new_button.font_size = font_size;
     new_button.color = color;
     new_button.bcolor = bcolor;
-    new_button.outline_color = outline_color;
     new_button.style = style;
     new_button.padding = 10;  // Set a default padding value
     new_button.outline_thickness = 2;  // Set default border thickness
@@ -263,11 +262,24 @@ int render_button(const CREATE *button_properties) {
     int button_width = text_surface->w + 2 * padding;
     int button_height = text_surface->h + 2 * padding;
 
-    // Draw the button background rectangle
-    draw_rectangle(button_properties->bcolor, button_width, button_height, button_properties->x, button_properties->y, FILLED);
+    // Shadow properties (shadow and dept)
+    int shadow_offset_x = 3; // Shadow offset in the x direction
+    int shadow_offset_y = 3; // Shadow offset in the y direction
+    Color shadow_color = {
+        button_properties->bcolor.r / 2,   // Darken the background color for shadow
+        button_properties->bcolor.g / 2,
+        button_properties->bcolor.b / 2,
+        button_properties->bcolor.a
+    };
 
-    // Draw the button outline (border)
-    draw_rectangle(button_properties->outline_color, button_width, button_height, button_properties->x, button_properties->y, OUTLINE);
+    // Draw the shadow (behind the button)
+    draw_rectangle(shadow_color, button_width, button_height, 
+                   button_properties->x + shadow_offset_x, 
+                   button_properties->y + shadow_offset_y, FILLED);
+
+    // Draw the button background rectangle
+    draw_rectangle(button_properties->bcolor, button_width, button_height, 
+                   button_properties->x, button_properties->y, FILLED);
 
     // Set the text position with padding
     SDL_Rect dst = {
@@ -288,9 +300,13 @@ int render_button(const CREATE *button_properties) {
     return 0;
 }
 
+
+
 //=================Forms============
 // forms and text area
 /*CREATE form(const char *place_holder ){
 	return;	
 }
 */
+
+

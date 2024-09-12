@@ -10,24 +10,19 @@
 #include"widgets.h"
 #include"state.h"
 int main() {
-    init("Gui", 500, 500);
-	background(WHITE);
-    // Initialize Text properties with style
-    CREATE props = text("Hello, World!", set, set, 50, BLACK, ITALIC);
+    if (!init("Gui", 500, 500)) {
+        printf("Failed to initialize SDL!\n");
+        return -1;
+    }
+    background(GRAY);
 
-    // Render the text with the modified properties
-    render_text(&props);
-    
-    // Add another text with auto alignment
-    CREATE text2 = complex_text("Auto align instead of x and y like ImGui", -1, -1, 16, RED, NORMAL,0,(EFFECT){hover,BLUE});
-    render_text(&text2);
-    
-    CREATE my_button = button("click me", 250, 100, 20, WHITE, BLUE, GRAY, BOLD);
+    CREATE my_button = button("click me", 30, 30, h4, RED, YELLOW, BOLD);
     
     render_button(&my_button);
 
     // Present the rendered output
     handle_events();
+    
     quit();
     return 0;
 }

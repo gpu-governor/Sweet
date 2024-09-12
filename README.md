@@ -25,7 +25,7 @@ This document outlines the features and tasks required for the development of th
 - [ ] implement complex function for all widgets (listed above)
 
 ### Advanced Features
-- [x] Improve core features (especially present handle event and layout manager)
+- [ ] Improve core features (especially present handle event and layout manager)
 - [ ] Widget Containers (Divs, Groups)
   - Support grouping of widgets for better UI structure.
 - [ ] CSS Support

@@ -1,4 +1,5 @@
-//===========[[[[[CLICKED]]]]]======================
+#include<stdbool.h>
+//================CLICKED======================
 // clicked?
 bool clicked(CREATE *item) {
     SDL_Event event;
@@ -28,3 +29,7 @@ bool clicked(CREATE *item) {
     }
     return item->is_clicked; // Return true if the button was clicked
 }
+
+// ===============================MOUSE IS OVER BUTTON==================================
+// ===============================BUTTON IS PRESSED==================================
+// Press Effect: Change the button's state when clicked or held down, for example, by slightly shrinking the button or adding a subtle color change.

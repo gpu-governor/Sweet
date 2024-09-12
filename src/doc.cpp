@@ -43,9 +43,9 @@ int main() {
 */
 
 
-//======================================
+//------------------------------------------------------------
 
-//example 2
+//example 2: using set, set is a global variable (-1), so instead of -1, place set in x and y
 /*
 int main() {
     if (!init("Gui", 500, 500)) {
@@ -71,7 +71,7 @@ int main() {
     return 0;
 }
 */
-//==========================================
+//------------------------------------------------------------------
 // example 3
 /*
 int main() {
@@ -93,7 +93,7 @@ int main() {
     return 0;
 }
 */
-//=========================================
+//------------------------------------------------------------------------
 // example 4: complex text and write
 int main() {
     if (!init("Gui", 500, 500)) {
@@ -111,7 +111,7 @@ int main() {
     handle_events();
     quit();
     return 0;
-}
+} // for now (sept 12, 2024. hover doesn't work), also the write() is a less parameter func for writing more text
 
 //====================BUTTONS==================
 
@@ -154,7 +154,7 @@ int main() {
     // renderButton(&my_button);
     render_button(&button2);
     // event handling using ternary
-    clicked(&my_button)? do_func() : proceed ;
+    clicked(&my_button)? do_func() : proceed ; // using a ternary operator
     
     // event using if
     if(clicked(&button2)){
