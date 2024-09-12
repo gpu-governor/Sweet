@@ -27,6 +27,7 @@ typedef struct {
     int font_size;
     Color color;
     bool is_clicked;
+    bool is_hovered;
     //  ... complex general
     int alignment;
     
@@ -43,8 +44,9 @@ typedef struct {
     // text box specific
     const char * place_holder;
 } CREATE;
+
 typedef struct{
-	int type;
+	int type; // can be hover, outline
 	Color color;
 }EFFECT;
 // ====================TEXT======================
@@ -263,8 +265,10 @@ int render_button(const CREATE *button_properties) {
     int button_height = text_surface->h + 2 * padding;
 
     // Shadow properties (shadow and dept)
-    int shadow_offset_x = 3; // Shadow offset in the x direction
-    int shadow_offset_y = 3; // Shadow offset in the y direction
+    int shadow_offset_w = 3; // Shadow offset in the x direction
+    int shadow_offset_h = 3; // Shadow offset in the y direction
+    
+    // shadow color 
     Color shadow_color = {
         button_properties->bcolor.r / 2,   // Darken the background color for shadow
         button_properties->bcolor.g / 2,
@@ -273,9 +277,8 @@ int render_button(const CREATE *button_properties) {
     };
 
     // Draw the shadow (behind the button)
-    draw_rectangle(shadow_color, button_width, button_height, 
-                   button_properties->x + shadow_offset_x, 
-                   button_properties->y + shadow_offset_y, FILLED);
+    draw_rectangle(shadow_color, button_width +shadow_offset_w, button_height+shadow_offset_h, 
+                   button_properties->x, button_properties->y, FILLED);
 
     // Draw the button background rectangle
     draw_rectangle(button_properties->bcolor, button_width, button_height, 
