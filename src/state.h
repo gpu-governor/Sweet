@@ -32,31 +32,29 @@ bool clicked(CREATE *item) {
 
 // ===============================MOUSE IS OVER BUTTON==================================
 bool mouse_over_widgets(CREATE *item) {
-    // Get the current mouse position
-    int x, y;
-    SDL_GetMouseState(&x, &y);
-	SDL_Point pt={x,y};
+    int x = event.motion.x;      // X position of the mouse
+    int y = event.motion.y;      // Y position of the mouse
 
-    // Define the widget rectangle (using the widget's dimensions)
-    SDL_Rect widget_rect = { item->x, item->y, item->width, item->height };
-    // Check if the mouse pointer is within the widget rectangle
+    SDL_Point pt = {x, y};
+    SDL_Rect widget_rect = {item->x, item->y, item->width, item->height};
+
     if (SDL_PointInRect(&pt, &widget_rect)) {
-        // Logic when the mouse is over the widget
-        item->is_hovered = true; // Update widget state (hovered)
-        printf("Mouse is over the widget at (%d, %d)\n", x, y);
-
-        // Apply hover effects (e.g., changing color or style)
-        // Example: change background color on hover
-        if (item->style == BOLD) {
-            item->bcolor = BLACK;  // You can change this to any hover color
+        if (!item->is_hovered) {
+            printf("Mouse entered widget area at (%d, %d)\n", x, y);
+            fflush(stdout);  // Ensure immediate printing
         }
+        item->is_hovered = true;
         return true;
     } else {
-        // Mouse is not over the widget
+        if (item->is_hovered) {
+            printf("Mouse left widget area at (%d, %d)\n", x, y);
+            fflush(stdout);  // Ensure immediate printing
+        }
         item->is_hovered = false;
         return false;
     }
 }
+
 
 // ===============================BUTTON IS PRESSED==================================
 // Press Effect: Change the button's state when clicked or held down, for example, by slightly shrinking the button or adding a subtle color change.

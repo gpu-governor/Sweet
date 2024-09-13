@@ -10,10 +10,9 @@
 #include"widgets.h"
 #include"state.h"
 int main() {
-    if (!init("Gui", 500, 500)) {
-        printf("Failed to initialize SDL!\n");
-        return -1;
-    }
+   init("Gui", 500, 500);
+   CREATE my_button = button("click me", 50, 50, h4, WHITE, BLUE, BOLD);
+   CREATE my_text = text("haha hi, you've been on my mind", set, set, h4, WHITE,BOLD);
    
     while (active) {
                         // Poll for events
@@ -27,19 +26,28 @@ int main() {
                                 updateWindowSize();  // Resize event triggers window size update
                             }
                             break;
+                        case SDL_MOUSEMOTION:
+                        	 mouse_over_widgets(&my_button);
+                     
+                        	break;
                         // Add other event handling cases here if needed
                         default:
                             break;
                     }
+                       if (event.type == SDL_MOUSEMOTION){
+                       	int x = event.motion.x;      // X position of the mouse
+                       	        int y = event.motion.y;      // Y position of the mouse
+                       	        int xrel = event.motion.xrel; // Relative motion in X direction
+                       	        int yrel = event.motion.yrel; // Relative motion in Y direction
+                       	        printf("Mouse moved to %d, %d\n", x, y);
+                       }
                 }
                  background(GRAY);
 
-    CREATE my_button = button("click me", 50, 50, h4, WHITE, BLUE, BOLD);
-    CREATE my_text = text("haha hi, you've been on my mind", set, set, h4, WHITE,BOLD);
+    
     
     render_button(&my_button);
     render_text(&my_text);
-    mouse_over_widgets(&my_button);
 	present();
 	}
     // Present the rendered output
