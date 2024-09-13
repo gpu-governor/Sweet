@@ -11,7 +11,7 @@
 #include"state.h"
 int main() {
    init("Gui", 500, 500);
-   CREATE my_button = button("click me", 50, 50, h4, WHITE, BLUE, BOLD);
+   CREATE my_button = button("click me", 50, 50, h4, WHITE, GREEN, BOLD);
    CREATE my_text = text("haha hi, you've been on my mind", set, set, h4, WHITE,BOLD);
    
     while (active) {
@@ -28,7 +28,6 @@ int main() {
                             break;
                         case SDL_MOUSEMOTION:
                         	 mouse_over_widgets(&my_button);
-                     
                         	break;
                         // Add other event handling cases here if needed
                         default:

@@ -32,24 +32,17 @@ bool clicked(CREATE *item) {
 
 // ===============================MOUSE IS OVER BUTTON==================================
 bool mouse_over_widgets(CREATE *item) {
-    int x = event.motion.x;      // X position of the mouse
-    int y = event.motion.y;      // Y position of the mouse
+	item->is_hovered = false; // set it to false on default (before programs start)
+    int x = event.motion.x;
+    int y = event.motion.y;
 
     SDL_Point pt = {x, y};
     SDL_Rect widget_rect = {item->x, item->y, item->width, item->height};
 
-    if (SDL_PointInRect(&pt, &widget_rect)) {
-        if (!item->is_hovered) {
-            printf("Mouse entered widget area at (%d, %d)\n", x, y);
-            fflush(stdout);  // Ensure immediate printing
-        }
+    if (SDL_PointInRect(&pt, &rect)) {
         item->is_hovered = true;
         return true;
     } else {
-        if (item->is_hovered) {
-            printf("Mouse left widget area at (%d, %d)\n", x, y);
-            fflush(stdout);  // Ensure immediate printing
-        }
         item->is_hovered = false;
         return false;
     }

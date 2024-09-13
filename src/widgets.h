@@ -33,8 +33,8 @@ typedef struct {
     
      
     // button specific
-    Color bcolor; // Background color for the button
-    Color outline_color; // Border color for the button
+	Color bcolor; // Background color for the button
+    Color hover_color; // Color when hovered
     int style;   // Text style (NORMAL, BOLD, etc.)
     int padding; // Padding around the text
     int outline_thickness; // Thickness of the button border
@@ -197,9 +197,6 @@ CREATE write(int font_size,const char *text) {
 //===============================BUTTONS============================================
 // Function to initialize Button with default values
 CREATE button(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
-    // Update window size automatically
-    updateWindowSize();
-
     CREATE new_button;
     new_button.text = text;
     new_button.font_size = font_size;
@@ -209,24 +206,32 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     new_button.padding = 10;  // Set a default padding value
     new_button.outline_thickness = 2;  // Set default border thickness
 
+    // Calculate hover color (lighter shade)
+    new_button.hover_color.r = (bcolor.r + 255) / 2;
+    new_button.hover_color.g = (bcolor.g + 255) / 2;
+    new_button.hover_color.b = (bcolor.b + 255) / 2;
+    new_button.hover_color.a = bcolor.a; // Keep alpha the same
+    
+
     // Handle auto positioning
-    if (x == -1) {  // -1 represents 'auto' for x
+    if (x == -1) {
         new_button.x = layout_context.cursor_x;
     } else {
         new_button.x = x;
     }
 
-    if (y == -1) {  // -1 represents 'auto' for y
+    if (y == -1) {
         new_button.y = layout_context.cursor_y;
     } else {
         new_button.y = y;
     }
 
     // Update the layout context cursor for the next button
-    layout_context.cursor_y += font_size + layout_context.padding; // Move down by the height of the font and padding
+    layout_context.cursor_y += font_size + layout_context.padding;
 
     return new_button;
 }
+
 
 // Function to render button
 int render_button(const CREATE *button_properties) {
@@ -264,38 +269,38 @@ int render_button(const CREATE *button_properties) {
     int button_width = text_surface->w + 2 * padding;
     int button_height = text_surface->h + 2 * padding;
 
-    // Shadow properties (shadow and dept)
-    int shadow_offset_w = 3; // Shadow offset in the x direction
-    int shadow_offset_h = 3; // Shadow offset in the y direction
-    
-    // shadow color 
+    // Shadow properties
+    int shadow_offset_w = 3;
+    int shadow_offset_h = 3;
+
+    // Shadow color
     Color shadow_color = {
-        button_properties->bcolor.r / 2,   // Darken the background color for shadow
+        button_properties->bcolor.r / 2,
         button_properties->bcolor.g / 2,
         button_properties->bcolor.b / 2,
         button_properties->bcolor.a
     };
 
-    // Draw the shadow (behind the button)
-    draw_rectangle(shadow_color, button_width +shadow_offset_w, button_height+shadow_offset_h, 
+    // Draw the shadow
+    draw_rectangle(shadow_color, button_width + shadow_offset_w, button_height + shadow_offset_h,
                    button_properties->x, button_properties->y, FILLED);
-
     // Draw the button background rectangle
-    draw_rectangle(button_properties->bcolor, button_width, button_height, 
+    draw_rectangle(button_properties->is_hovered ?button_properties->hover_color : button_properties->bcolor,
+                   button_width, button_height,
                    button_properties->x, button_properties->y, FILLED);
 
     // Set the text position with padding
     SDL_Rect dst = {
-        button_properties->x + padding,       // x position with left padding
-        button_properties->y + padding,       // y position with top padding
-        text_surface->w,                      // width of the text
-        text_surface->h                       // height of the text
+        button_properties->x + padding,
+        button_properties->y + padding,
+        text_surface->w,
+        text_surface->h
     };
-    
+
     // Copy text texture to renderer
     SDL_RenderCopy(ren, text_texture, NULL, &dst);
 
-    // Clean up the surface, texture, and font
+    // Clean up
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
     TTF_CloseFont(font);

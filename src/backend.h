@@ -14,6 +14,8 @@
 SDL_Window *win = NULL;
 SDL_Renderer *ren = NULL;
 SDL_Event event;
+SDL_Rect rect; //experimental
+
 bool active = true; // so you can use while (active) { // SDL events }
 // layout context
 //  function to update the window size in the LayoutContext
@@ -123,7 +125,6 @@ typedef enum {
 } ShapeType;
 
 void draw_rectangle(Color color, int width, int height, int xpos, int ypos, ShapeType type) {
-    SDL_Rect rect;
     rect.x = xpos; // X position
     rect.y = ypos; // Y position
     rect.w = width; // Width
