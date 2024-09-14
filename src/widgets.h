@@ -205,6 +205,7 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     new_button.style = style;
     new_button.padding = 10;  // Set a default padding value
     new_button.outline_thickness = 2;  // Set default border thickness
+	new_button.is_hovered = false; // set it to false on default (before programs start)
 
     // Calculate hover color (lighter shade)
     new_button.hover_color.r = (bcolor.r + 255) / 2;

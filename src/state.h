@@ -32,7 +32,6 @@ bool clicked(CREATE *item) {
 
 // ===============================MOUSE IS OVER BUTTON==================================
 bool mouse_over_widgets(CREATE *item) {
-	item->is_hovered = false; // set it to false on default (before programs start)
     int x = event.motion.x;
     int y = event.motion.y;
 

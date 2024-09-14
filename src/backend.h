@@ -14,7 +14,7 @@
 SDL_Window *win = NULL;
 SDL_Renderer *ren = NULL;
 SDL_Event event;
-SDL_Rect rect; //experimental
+SDL_Rect rect; // so for hover and pressed can detect mouse over widgets rect (buttons, ...) 
 
 bool active = true; // so you can use while (active) { // SDL events }
 // layout context
