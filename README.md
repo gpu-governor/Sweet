@@ -8,7 +8,7 @@
 This document outlines the features and tasks required for the development of the Sweet GUI library.
 
 ### Core Features
-- [x] Basic widgets (Text & Buttons)
+- [x] Basic widgets (Text, Labels & Buttons)
 - [x] Handle events, states, layout manager
 - [ ] Expand widget collection:
   - [ ] Sliders

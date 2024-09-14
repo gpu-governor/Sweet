@@ -36,7 +36,7 @@ bool mouse_over_widgets(CREATE *item) {
     int y = event.motion.y;
 
     SDL_Point pt = {x, y};
-    SDL_Rect widget_rect = {item->x, item->y, item->width, item->height};
+    SDL_Rect widget_rect = {rect.x, rect.y, rect.w, rect.h};
 
     if (SDL_PointInRect(&pt, &rect)) {
         item->is_hovered = true;

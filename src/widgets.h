@@ -309,7 +309,97 @@ int render_button(const CREATE *button_properties) {
     return 0;
 }
 
+//===============================LABELS============================================
+// Function to initialize Button with default values
+CREATE label(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
+	// label is almost like button as in has text, background, ...
+	// but label does not hover on default and does not have shadow and dept
+    CREATE new_label;
+    new_label.text = text;
+    new_label.font_size = font_size;
+    new_label.color = color;
+    new_label.bcolor = bcolor;
+    new_label.style = style;
+    new_label.padding = 10;  // Set a default padding value
+    new_label.outline_thickness = 2;  // Set default border thickness; FIX ME (outline removed)
+    // Handle auto positioning
+    if (x == -1) {
+        new_label.x = layout_context.cursor_x;
+    } else {
+        new_label.x = x;
+    }
 
+    if (y == -1) {
+        new_label.y = layout_context.cursor_y;
+    } else {
+        new_label.y = y;
+    }
+
+    // Update the layout context cursor for the next button
+    layout_context.cursor_y += font_size + layout_context.padding;
+
+    return new_label;
+}
+
+
+// Function to render button
+int render_label(const CREATE *label_properties) {
+    // Load font
+    TTF_Font *font = TTF_OpenFont(font_path, label_properties->font_size);
+    if (!font) {
+        printf("Failed to load font! TTF_Error: %s\n", TTF_GetError());
+        return -1;
+    }
+
+    // Set font style
+    TTF_SetFontStyle(font, label_properties->style);
+
+    SDL_Color sdl_color = {label_properties->color.r, label_properties->color.g, label_properties->color.b, label_properties->color.a};
+
+    // Render text to surface
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, label_properties->text, sdl_color);
+    if (!text_surface) {
+        printf("Unable to render text surface! TTF_Error: %s\n", TTF_GetError());
+        TTF_CloseFont(font);
+        return -1;
+    }
+
+    // Create a Texture from the Surface
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(ren, text_surface);
+    if (!text_texture) {
+        printf("Unable to create texture from rendered text! SDL_Error: %s\n", SDL_GetError());
+        SDL_FreeSurface(text_surface);
+        TTF_CloseFont(font);
+        return -1;
+    }
+
+    // Calculate button dimensions with padding
+    int padding = label_properties->padding;
+    int label_width = text_surface->w + 2 * padding;
+    int label_height = text_surface->h + 2 * padding;
+
+   
+    // Draw the button background rectangle
+    draw_rectangle(label_properties->bcolor,label_width, label_height,label_properties->x, label_properties->y, FILLED);
+
+    // Set the text position with padding
+    SDL_Rect dst = {
+        label_properties->x + padding,
+        label_properties->y + padding,
+        text_surface->w,
+        text_surface->h
+    };
+
+    // Copy text texture to renderer
+    SDL_RenderCopy(ren, text_texture, NULL, &dst);
+
+    // Clean up
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    TTF_CloseFont(font);
+
+    return 0;
+}
 
 //=================Forms============
 // forms and text area
