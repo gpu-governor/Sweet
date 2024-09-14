@@ -400,7 +400,92 @@ int render_label(const CREATE *label_properties) {
 
     return 0;
 }
+//===============================SLIDERS============================================
+CREATE slider(int type, float range,int x, int y, int font_size, int width, Color color, Color bcolor) {
+	CREATE new_slider;
+    new_slider.type = type; 	// where type can be percentage, radian (360), 
+    new_slider.font_size = font_size;
+    new_slider.color = color;
+    new_slider.bcolor = bcolor;
+    new_slider.width = width; // so users can make it wide to their taste, maybe height will be same, but i dunno 
 
+
+    // Handle auto positioning
+    if (x == -1) {
+        new_slider.x = layout_context.cursor_x;
+    } else {
+        new_slider.x = x;
+    }
+
+    if (y == -1) {
+        new_slider.y = layout_context.cursor_y;
+    } else {
+        new_slider.y = y;
+    }
+
+    // Update the layout context cursor for the next button
+    layout_context.cursor_y += font_size + layout_context.padding;
+
+    return new_slider;
+}
+
+int render_slider(const CREATE *slider_properties) {
+    // Load font
+    TTF_Font *font = TTF_OpenFont(font_path, label_properties->font_size);
+    if (!font) {
+        printf("Failed to load font! TTF_Error: %s\n", TTF_GetError());
+        return -1;
+    }
+
+    // Set font style
+    TTF_SetFontStyle(font, slider_properties->style);
+
+    SDL_Color sdl_color = {slider_properties->color.r,slider_properties->color.g, slider_properties->color.b, slider_properties->color.a};
+
+    // Render text to surface
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, label_properties->text, sdl_color);
+    if (!text_surface) {
+        printf("Unable to render text surface! TTF_Error: %s\n", TTF_GetError());
+        TTF_CloseFont(font);
+        return -1;
+    }
+
+    // Create a Texture from the Surface
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(ren, text_surface);
+    if (!text_texture) {
+        printf("Unable to create texture from rendered text! SDL_Error: %s\n", SDL_GetError());
+        SDL_FreeSurface(text_surface);
+        TTF_CloseFont(font);
+        return -1;
+    }
+
+    // TODO Calculate slider dimensions with padding
+    int padding = label_properties->padding;
+    int label_width = text_surface->w + 2 * padding;
+    int label_height = text_surface->h + 2 * padding;
+
+   
+    // Draw the  background rectangle (Gauge)
+    draw_rectangle(label_properties->bcolor,label_width, label_height,label_properties->x, label_properties->y, FILLED);
+
+    // Set the text position with padding
+    SDL_Rect dst = {
+        label_properties->x + padding,
+        label_properties->y + padding,
+        text_surface->w,
+        text_surface->h
+    };
+
+    // Copy text texture to renderer
+    SDL_RenderCopy(ren, text_texture, NULL, &dst);
+
+    // Clean up
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
+    TTF_CloseFont(font);
+
+    return 0;
+}
 //=================Forms============
 // forms and text area
 /*CREATE form(const char *place_holder ){
