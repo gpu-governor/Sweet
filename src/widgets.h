@@ -27,6 +27,7 @@ typedef struct {
     Color color;
     bool is_clicked;
     bool is_hovered;
+    bool is_pressed;
     //  ... complex general
     int alignment;
     

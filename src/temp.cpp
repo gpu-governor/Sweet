@@ -34,6 +34,10 @@ int main() {
                         	 mouse_over_widgets(&my_button1);
                         	 mouse_over_widgets(&my_button2);
                         	break;
+                     /*   case SDL_MOUSEBUTTONDOWN:
+                        	button_pressed(&my_button);
+                        break;
+                        */
                         // Add other event handling cases here if needed
                         default:
                             break;
