@@ -207,11 +207,13 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     new_button.outline_thickness = 2;  // Set default border thickness
 	new_button.is_hovered = false; // set it to false on default (before programs start)
 
-    // Calculate hover color (lighter shade)
-    new_button.hover_color.r = (bcolor.r + 255) / 2;
-    new_button.hover_color.g = (bcolor.g + 255) / 2;
-    new_button.hover_color.b = (bcolor.b + 255) / 2;
+    // Calculate hover color (less bright lighter shade)
+    const int lighten_factor = 100; // Adjust this value to control the lightness
+    new_button.hover_color.r = (bcolor.r + lighten_factor) / 2;
+    new_button.hover_color.g = (bcolor.g + lighten_factor) / 2;
+    new_button.hover_color.b = (bcolor.b + lighten_factor) / 2;
     new_button.hover_color.a = bcolor.a; // Keep alpha the same
+    
 
     		  // x and y for the invincible rect over button to dectect hover
 	        new_button.rect1.x = x;
