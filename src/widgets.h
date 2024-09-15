@@ -19,6 +19,7 @@ const int STRIKETHROUGH = TTF_STYLE_STRIKETHROUGH;
 // Define a structure to hold widgets (button, label) properties
 typedef struct {
     // general (buttons, text, grid, ...)
+    SDL_Rect rect1;     // Unique rectangle for each button
     const char *text;
     int x;
     int y;
@@ -211,7 +212,10 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     new_button.hover_color.g = (bcolor.g + 255) / 2;
     new_button.hover_color.b = (bcolor.b + 255) / 2;
     new_button.hover_color.a = bcolor.a; // Keep alpha the same
-    
+
+    		  // x and y for the invincible rect over button to dectect hover
+	        new_button.rect1.x = x;
+	        new_button.rect1.y = y;
 
     // Handle auto positioning
     if (x == -1) {
@@ -234,7 +238,7 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
 
 
 // Function to render button
-int render_button(const CREATE *button_properties) {
+int render_button( CREATE *button_properties) {
     // Load font
     TTF_Font *font = TTF_OpenFont(font_path, button_properties->font_size);
     if (!font) {
@@ -268,7 +272,10 @@ int render_button(const CREATE *button_properties) {
     int padding = button_properties->padding;
     int button_width = text_surface->w + 2 * padding;
     int button_height = text_surface->h + 2 * padding;
-
+	  // width for the invincible rect over button to dectect hover
+	  button_properties->rect1.w = button_width;
+	  button_properties->rect1.h = button_height;
+	        
     // Shadow properties
     int shadow_offset_w = 3;
     int shadow_offset_h = 3;
@@ -296,7 +303,12 @@ int render_button(const CREATE *button_properties) {
         text_surface->w,
         text_surface->h
     };
+    // EXPERIMENTAL
+    
+    // Draw the new rect above button's rectangle for dectecting hover
+    SDL_RenderFillRect(ren, &button_properties->rect1);
 
+    
     // Copy text texture to renderer
     SDL_RenderCopy(ren, text_texture, NULL, &dst);
 

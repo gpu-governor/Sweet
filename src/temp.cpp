@@ -31,6 +31,8 @@ int main() {
                             break;
                         case SDL_MOUSEMOTION:
                         	 mouse_over_widgets(&my_button);
+                        	 mouse_over_widgets(&my_button1);
+                        	 mouse_over_widgets(&my_button2);
                         	break;
                         // Add other event handling cases here if needed
                         default:

@@ -37,7 +37,7 @@ bool mouse_over_widgets(CREATE *item) {
 
     SDL_Point pt = {x, y};
     
-    if (SDL_PointInRect(&pt, &rect)) {
+    if (SDL_PointInRect(&pt, &item->rect1)) {
         item->is_hovered = true;
         return true;
     } else {
