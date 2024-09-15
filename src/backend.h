@@ -3,12 +3,6 @@
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-/*
-	* init()
-	* terminate()
-	* handle_events()
-	* clear_screen
-*/
 
 // Global variables
 SDL_Window *win = NULL;
@@ -214,9 +208,9 @@ void present() {
     SDL_RenderPresent(ren);
 }
 
-// [[[[[EVENTS]]]]]
+//====================EVENTS==============================
 void handle_events() {
-present();
+present(); // NOTE: called present first for a reason
 
         while (active) {
                     // Poll for events
@@ -237,8 +231,6 @@ present();
             }
             
             // Render the updated frame
-          //  present();
-            // Optionally, handle frame logic, updating scene, etc.
         }
     }
     
@@ -266,9 +258,7 @@ void load_img(const char *path) {
 }
 
 
-// ========= Background
+// ===============BACKGROUND=====================
 void background(Color color){
 	clear_screen(color);
 }
-
-

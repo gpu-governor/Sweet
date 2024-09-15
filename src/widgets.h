@@ -1,16 +1,14 @@
 // GLOBAL VARIABLES
 const char* font_path = "assets/FreeMono.ttf";
-int set = -1;
+const int set = -1;
 // EFFECT var
 const int hover=1, when_clicked=2, outline=3;
 // In HTML, the default font sizes for heading elements (`h1`, `h2`, etc.) are typically defined relative to the browser's default font size, which is usually `16px`. Here's the approximate mapping of default heading sizes to pixel values in most browsers:
-int h1 =32, h2=24, h3=19,h4=16,h5= 13,h6=11;
-int p=16;
+const int h1 =32, h2=24, h3=19,h4=16,h5= 13,h6=11; int p=16;
 // when using the text(), if users don't want to enter font size, the can use predefined html tags.
 
 // GLOBAL MACROS
-// Define a macro for no-op
-#define proceed (void)0
+#define proceed (void)0 // Define a macro for no-op
 // Define constants for text styles
 const int NORMAL = TTF_STYLE_NORMAL;
 const int BOLD = TTF_STYLE_BOLD;
@@ -40,7 +38,8 @@ typedef struct {
     int outline_thickness; // Thickness of the button border
     int width;  // Width of the button
     int height; // Height of the button
-    
+    // slider specific
+    int type;
     // text box specific
     const char * place_holder;
 } CREATE;
@@ -431,7 +430,7 @@ CREATE slider(int type, float range,int x, int y, int font_size, int width, Colo
 
 int render_slider(const CREATE *slider_properties) {
     // Load font
-    TTF_Font *font = TTF_OpenFont(font_path, label_properties->font_size);
+    TTF_Font *font = TTF_OpenFont(font_path, slider_properties->font_size);
     if (!font) {
         printf("Failed to load font! TTF_Error: %s\n", TTF_GetError());
         return -1;
@@ -443,7 +442,7 @@ int render_slider(const CREATE *slider_properties) {
     SDL_Color sdl_color = {slider_properties->color.r,slider_properties->color.g, slider_properties->color.b, slider_properties->color.a};
 
     // Render text to surface
-    SDL_Surface *text_surface = TTF_RenderText_Blended(font, label_properties->text, sdl_color);
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, slider_properties->text, sdl_color);
     if (!text_surface) {
         printf("Unable to render text surface! TTF_Error: %s\n", TTF_GetError());
         TTF_CloseFont(font);
@@ -460,19 +459,19 @@ int render_slider(const CREATE *slider_properties) {
     }
 
     // TODO Calculate slider dimensions with padding
-    int padding = label_properties->padding;
-    int label_width = text_surface->w + 2 * padding;
-    int label_height = text_surface->h + 2 * padding;
+    int padding = slider_properties->padding;
+    int slider_width = text_surface->w + 2 * padding;
+    int slider_height = text_surface->h + 2 * padding;
 
    
     // Draw the  background rectangle (Gauge)
-    draw_rectangle(label_properties->bcolor,label_width, label_height,label_properties->x, label_properties->y, FILLED);
+    draw_rectangle(slider_properties->bcolor,slider_width, slider_height,slider_properties->x, slider_properties->y, FILLED);
 
     // Set the text position with padding
     SDL_Rect dst = {
-        label_properties->x + padding,
-        label_properties->y + padding,
-        text_surface->w,
+        slider_properties->x + padding,
+        slider_properties->y + padding,
+      	text_surface->w,
         text_surface->h
     };
 
@@ -492,5 +491,3 @@ int render_slider(const CREATE *slider_properties) {
 	return;	
 }
 */
-
-
