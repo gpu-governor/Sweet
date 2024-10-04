@@ -126,7 +126,7 @@ CREATE text(const char *text, int x, int y, int font_size, Color color, int styl
 
     
     // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
-    	register_widget(WIDGET_BUTTON, &new_text);
+    	register_widget(WIDGET_TEXT, &new_text);
     
     	//return new_widgets so it can be used in render 
         return new_text;
@@ -408,7 +408,7 @@ CREATE label(const char *text, int x, int y, int font_size, Color color, Color b
     layout_context.cursor_y += font_size + layout_context.padding;
 
     // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
-    	register_widget(WIDGET_BUTTON, &new_label);
+    	register_widget(WIDGET_LABEL, &new_label);
     
     	//return new_widgets so it can be used in render 
         return new_label;
@@ -585,6 +585,9 @@ void render_widgets() {
                 break;
             case WIDGET_LABEL:
                 render_label((CREATE*)widgets[i].widget);
+                break;
+            case WIDGET_TEXT:
+                render_text((CREATE*)widgets[i].widget);
                 break;
             // Add cases for other widget types here as you implement them
             default:
