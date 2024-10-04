@@ -8,7 +8,7 @@
 // local includes
 #include "backend.h"
 #include"widgets.h"
-#include"state.h"
+
 int main() {
    init("Gui", 500, 500);
    CREATE my_button = button("click me", 200, 200, h4, YELLOW, BLACK, BOLD);

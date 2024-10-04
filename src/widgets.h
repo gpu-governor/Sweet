@@ -73,6 +73,33 @@ bool mouse_over_widgets(CREATE *item) {
     }
 
 }
+// clicked? may be deprecated for the pressed function
+bool clicked(CREATE *item) {
+
+    SDL_Point pt = {mouse_x, mouse_y};
+    
+    if (SDL_PointInRect(&pt, &item->rect1)) {
+        item->is_clicked = true;
+        return true;
+    } else {
+        item->is_clicked = false;
+        return false;
+    }
+}
+bool button_pressed(CREATE *item){
+	 mouse_x = event.motion.x;
+ 	 mouse_y = event.motion.y;
+	 SDL_Point pt = {mouse_x, mouse_y};
+    
+    if (SDL_PointInRect(&pt, &item->rect1)) {
+        item->is_pressed = true;
+        return true;
+    } else {
+        item->is_pressed = false;
+        return false;
+    }
+}
+
 //----------------------------------------------
 
 
@@ -382,7 +409,7 @@ int render_button( CREATE *button_properties) {
         text_surface->w,
         text_surface->h
     };
-    // EXPERIMENTAL
+    
     
     // Draw the new rect above button's rectangle for dectecting hover
     SDL_RenderFillRect(ren, &button_properties->rect1);
