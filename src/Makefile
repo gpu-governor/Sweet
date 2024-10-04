@@ -1,6 +1,6 @@
 # Variables
 COMPILER = g++
-SOURCE_FILE = temp.cpp
+SOURCE_FILE = temp.c
 OUTPUT_FILE = main
 SDL_LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf
 

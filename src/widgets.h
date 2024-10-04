@@ -50,6 +50,52 @@ typedef struct{
 	int type; // can be hover, outline
 	Color color;
 }EFFECT;
+
+
+
+
+//===================RETAINED MODE SYSTEM==========================
+typedef enum {
+    WIDGET_BUTTON,
+    WIDGET_LABEL,
+    WIDGET_TEXT
+} WidgetType;
+
+typedef struct {
+    WidgetType type;
+    void* widget;  // Pointer to the actual widget (Button, Label, or Text)
+} Widget;
+
+#define MAX_WIDGETS 100
+Widget widgets[MAX_WIDGETS];
+int widget_count = 0;
+
+
+void register_widget(WidgetType type, void* widget) {
+// this function is called internally when a new widgets is created
+/*
+When users call button(), label(), or text(), these will register their widgets internally:
+
+Button button(parameters) {
+    Button new_button = create_button(text, x, y, font_size, fg, bg, style);
+    register_widget(WIDGET_BUTTON, &new_button); <<<<<< registering
+    return new_button;
+}
+
+*/
+    if (widget_count < MAX_WIDGETS) {
+        widgets[widget_count].type = type;
+        widgets[widget_count].widget = widget;
+        widget_count++;
+    }
+}
+//=======================================================
+
+
+
+
+
+
 // ====================TEXT======================
 // Function to initialize Text with default values
 CREATE text(const char *text, int x, int y, int font_size, Color color, int style) {
@@ -78,7 +124,12 @@ CREATE text(const char *text, int x, int y, int font_size, Color color, int styl
     // Update the layout context cursor for the next text
     layout_context.cursor_y += font_size + layout_context.padding; // Move down by the height of the font and padding
 
-    return new_text;
+    
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    	register_widget(WIDGET_BUTTON, &new_text);
+    
+    	//return new_widgets so it can be used in render 
+        return new_text;
 }
 
 // Function to render text based on the Text structure
@@ -236,6 +287,10 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     // Update the layout context cursor for the next button
     layout_context.cursor_y += font_size + layout_context.padding;
 
+// registers button so sw_loop() can keep track of it, see render_widgets() for more details
+	register_widget(WIDGET_BUTTON, &new_button);
+
+	//return new_button so it can be used in render 
     return new_button;
 }
 
@@ -352,7 +407,11 @@ CREATE label(const char *text, int x, int y, int font_size, Color color, Color b
     // Update the layout context cursor for the next button
     layout_context.cursor_y += font_size + layout_context.padding;
 
-    return new_label;
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    	register_widget(WIDGET_BUTTON, &new_label);
+    
+    	//return new_widgets so it can be used in render 
+        return new_label;
 }
 
 
@@ -506,3 +565,57 @@ int render_slider(const CREATE *slider_properties) {
 	return;	
 }
 */
+
+
+
+
+//=====================RENDER ALL WIDGETS=============================
+void render_widgets() {
+/*
+ Key Steps for render_widgets():
+ 
+    *  Widget Registration: Whenever the user calls button(), label(), or text(), these widgets need to be registered in an internal data structure like a list or array.
+    * Widget Rendering: In render_widgets(), the system will loop through all registered widgets and call the appropriate rendering function for each one, like render_button(), render_label(), or render_text().
+    * Widget Type Checking: Each widget will have a type (e.g., button, label, text), and based on that type, the corresponding render function will be called.
+*/
+    for (int i = 0; i < widget_count; ++i) {
+        switch (widgets[i].type) {
+            case WIDGET_BUTTON:
+                render_button((CREATE*)widgets[i].widget);
+                break;
+            case WIDGET_LABEL:
+                render_label((CREATE*)widgets[i].widget);
+                break;
+            // Add cases for other widget types here as you implement them
+            default:
+                break;
+        }
+    }
+}
+
+//=====================================gui loop=================================================
+ void sw_loop() {
+     while (active) {
+         SDL_Event event;
+         while (SDL_PollEvent(&event)) {
+             switch (event.type) {
+                 case SDL_QUIT:
+                     active = false;  // User closed the window
+                     break;
+                 case SDL_MOUSEBUTTONDOWN:
+                 //    handle_widget_clicks();  // Internal click handler for all widgets
+                     break;
+                 case SDL_WINDOWEVENT:
+                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                         updateWindowSize();  // Resize event triggers window size update
+                     }
+                     break;
+                 default:
+                     break;
+             }
+         }
+          background(GRAY);
+         render_widgets();  // Render all widgets (handled by library)
+         present();         // Present the rendered output
+     }
+ }
