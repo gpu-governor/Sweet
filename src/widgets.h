@@ -1,3 +1,4 @@
+
 // GLOBAL VARIABLES
 const char* font_path = "assets/FreeMono.ttf";
 const int set = -1;
@@ -55,6 +56,26 @@ typedef struct{
 
 
 //===================RETAINED MODE SYSTEM==========================
+//global
+ int mouse_x;
+ int mouse_y;
+bool mouse_over_widgets(CREATE *item) {
+	 mouse_x = event.motion.x;
+ 	 mouse_y = event.motion.y;
+    SDL_Point pt = {mouse_x, mouse_y};
+    
+    if (SDL_PointInRect(&pt, &item->rect1)) {
+        item->is_hovered = true;
+        return true;
+    } else {
+        item->is_hovered = false;
+        return false;
+    }
+
+}
+//----------------------------------------------
+
+
 typedef enum {
     WIDGET_BUTTON,
     WIDGET_LABEL,
@@ -378,6 +399,24 @@ int render_button( CREATE *button_properties) {
     return 0;
 }
 
+//---------------------------------- handle_button_hover()---------------------------------
+void handle_button_hover(){
+
+	 for (int i = 0; i < widget_count; ++i) {
+        switch (widgets[i].type) {
+            case WIDGET_BUTTON:
+                mouse_over_widgets((CREATE*)widgets[i].widget);
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+
+
+
 //===============================LABELS============================================
 // Function to initialize Button with default values
 CREATE label(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
@@ -607,6 +646,10 @@ void render_widgets() {
                      break;
                  case SDL_MOUSEBUTTONDOWN:
                  //    handle_widget_clicks();  // Internal click handler for all widgets
+                     break;
+                 case SDL_MOUSEMOTION:
+                 	
+                    handle_button_hover();  // Internal hover handler for buttons
                      break;
                  case SDL_WINDOWEVENT:
                      if (event.window.event == SDL_WINDOWEVENT_RESIZED) {

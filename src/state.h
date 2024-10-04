@@ -1,7 +1,5 @@
 #include<stdbool.h>
-//global
- int mouse_x;
- int mouse_y;
+
 //================CLICKED======================
 // Calculate hover color (less bright lighter shade)
 
@@ -20,19 +18,7 @@ bool clicked(CREATE *item) {
 }
 
 // ===============================MOUSE IS OVER BUTTON==================================
-bool mouse_over_widgets(CREATE *item) {
-	 mouse_x = event.motion.x;
- 	 mouse_y = event.motion.y;
-    SDL_Point pt = {mouse_x, mouse_y};
-    
-    if (SDL_PointInRect(&pt, &item->rect1)) {
-        item->is_hovered = true;
-        return true;
-    } else {
-        item->is_hovered = false;
-        return false;
-    }
-}
+
 
 
 // ===============================BUTTON IS PRESSED==================================
