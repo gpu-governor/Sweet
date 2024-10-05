@@ -208,33 +208,8 @@ void present() {
     SDL_RenderPresent(ren);
 }
 
-//====================EVENTS==============================
-void handle_events() {
-present(); // NOTE: called present first for a reason
 
-        while (active) {
-                    // Poll for events
-            while (SDL_PollEvent(&event)) {
-                switch (event.type) {
-                    case SDL_QUIT:
-                        active = false;  // User closed the window
-                        break;
-                    case SDL_WINDOWEVENT:
-                        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                            updateWindowSize();  // Resize event triggers window size update
-                        }
-                        break;
-                    // Add other event handling cases here if needed
-                    default:
-                        break;
-                }
-            }
-            
-            // Render the updated frame
-        }
-    }
-    
-// =============IMG, AUDIO LOAD===========================
+// =============IMG LOAD===========================
 
 void load_img(const char *path) {
     SDL_Surface *img = IMG_Load(path);
