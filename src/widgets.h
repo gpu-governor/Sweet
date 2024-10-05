@@ -29,6 +29,8 @@ typedef struct {
     bool is_clicked;
     bool is_hovered;
     bool is_pressed;
+    
+    Color shadow_color;
     //  ... complex general
     int alignment;
     
@@ -295,154 +297,165 @@ CREATE sw_write(int font_size,const char *text) {
 
 
 //===============================BUTTONS============================================
-// Function to initialize Button with default values
+// Function to calculate a darker shadow color
+Color calculateShadowColor(Color color) {
+    Color shadow_color;
+    int darken_factor = 100;
+    shadow_color.r = (color.r > darken_factor) ? color.r - darken_factor : 0;
+    shadow_color.g = (color.g > darken_factor) ? color.g - darken_factor : 0;
+    shadow_color.b = (color.b > darken_factor) ? color.b - darken_factor : 0;
+    shadow_color.a = color.a;
+    return shadow_color;
+}
+
+// Function to initialize a button
 CREATE sw_button(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
+    
+    // Update window size automatically
+    updateWindowSize();
+    
     CREATE new_button;
     new_button.text = text;
     new_button.font_size = font_size;
     new_button.color = color;
     new_button.bcolor = bcolor;
     new_button.style = style;
-    new_button.padding = 10;  // Set a default padding value
-    new_button.outline_thickness = 2;  // Set default border thickness
-	new_button.is_hovered = false; // set it to false on default (before programs start)
+    new_button.padding = 10;  // Padding for text inside the button
+    new_button.is_hovered = 0;
+    new_button.is_clicked = 0;
+    new_button.is_pressed = 0;
 
-    // Calculate hover color (less bright lighter shade)
-    const int lighten_factor = 100; // Adjust this value to control the lightness
-    new_button.hover_color.r = (bcolor.r + lighten_factor) / 2;
-    new_button.hover_color.g = (bcolor.g + lighten_factor) / 2;
-    new_button.hover_color.b = (bcolor.b + lighten_factor) / 2;
-    new_button.hover_color.a = bcolor.a; // Keep alpha the same
+    // Calculate hover color (lighter)
+    const int lighten_factor = 50;
+    new_button.hover_color.r = (bcolor.r + lighten_factor > 255) ? 255 : bcolor.r + lighten_factor;
+    new_button.hover_color.g = (bcolor.g + lighten_factor > 255) ? 255 : bcolor.g + lighten_factor;
+    new_button.hover_color.b = (bcolor.b + lighten_factor > 255) ? 255 : bcolor.b + lighten_factor;
+    new_button.hover_color.a = bcolor.a;
+
+    // Calculate shadow color (darker)
+    new_button.shadow_color = calculateShadowColor(bcolor);
     
-
-    		  // x and y for the invincible rect over button to dectect hover
-	        new_button.rect1.x = x;
-	        new_button.rect1.y = y;
-
     // Handle auto positioning
-    if (x == -1) {
+    if (x == -1) {  // -1 represents 'auto' for x
         new_button.x = layout_context.cursor_x;
     } else {
         new_button.x = x;
     }
 
-    if (y == -1) {
+    if (y == -1) {  // -1 represents 'auto' for y
         new_button.y = layout_context.cursor_y;
     } else {
         new_button.y = y;
     }
+    new_button.width = 200;
+    new_button.height = 50;
 
-    // Update the layout context cursor for the next button
-    layout_context.cursor_y += font_size + layout_context.padding;
+    new_button.rect1.x = new_button.x;
+    new_button.rect1.y = new_button.y;
+    new_button.rect1.w = new_button.width;
+    new_button.rect1.h = new_button.height;
 
-// registers button so sw_loop() can keep track of it, see render_widgets() for more details
-	sw_register_widget(WIDGET_BUTTON, &new_button);
+    // Update the layout context cursor for the next text
+    layout_context.cursor_y += font_size + layout_context.padding; // Move down by the height of the font and padding
+    
+    
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    	sw_register_widget(WIDGET_BUTTON, &new_button);
 
-	//return new_button so it can be used in render 
     return new_button;
 }
 
-
-// Function to render button
-int sw_render_button( CREATE *button_properties) {
-    // Load font
-    TTF_Font *font = TTF_OpenFont(font_path, button_properties->font_size);
+// Function to render a button with a shadow and text
+void sw_render_button( CREATE *button) {
+    // Load the font (inside renderButton)
+    TTF_Font *font = TTF_OpenFont(font_path, button->font_size);
     if (!font) {
-        printf("Failed to load font! TTF_Error: %s\n", TTF_GetError());
-        return -1;
+        printf("Failed to load font: %s\n", TTF_GetError());
+        return;
     }
 
-    // Set font style
-    TTF_SetFontStyle(font, button_properties->style);
+    // Shadow position (same x, y but bigger width/height)
+    SDL_Rect shadow_rect = button->rect1;
+    shadow_rect.w += 4;  // Make shadow wider
+    shadow_rect.h += 4;  // Make shadow taller
 
-    SDL_Color sdl_color = {button_properties->color.r, button_properties->color.g, button_properties->color.b, button_properties->color.a};
-
-    // Render text to surface
-    SDL_Surface *text_surface = TTF_RenderText_Blended(font, button_properties->text, sdl_color);
-    if (!text_surface) {
-        printf("Unable to render text surface! TTF_Error: %s\n", TTF_GetError());
-        TTF_CloseFont(font);
-        return -1;
+    // Adjust button and shadow size when pressed
+    SDL_Rect button_rect = button->rect1;
+    if (button->is_pressed) {
+        button_rect.x += 2;
+        button_rect.y += 2;
+        button_rect.w -= 4;
+        button_rect.h -= 4;
+        shadow_rect.w -= 4;  // Shrink shadow to match button shrink
+        shadow_rect.h -= 4;
     }
 
-    // Create a Texture from the Surface
+    // Render the shadow first (always below the button)
+    SDL_SetRenderDrawColor(ren, button->shadow_color.r, button->shadow_color.g, button->shadow_color.b, button->shadow_color.a);
+    SDL_RenderFillRect(ren, &shadow_rect);
+
+    // Set color based on hover state (no color change for press)
+    if (button->is_hovered) {
+        SDL_SetRenderDrawColor(ren, button->hover_color.r, button->hover_color.g, button->hover_color.b, button->hover_color.a);
+    } else {
+        SDL_SetRenderDrawColor(ren, button->bcolor.r, button->bcolor.g, button->bcolor.b, button->bcolor.a);
+    }
+
+    // Draw the button
+    SDL_RenderFillRect(ren, &button_rect);
+
+    // Render the text centered in the button
+    SDL_Surface *text_surface = TTF_RenderText_Solid(font, button->text, (SDL_Color){button->color.r, button->color.g, button->color.b, button->color.a});
     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(ren, text_surface);
-    if (!text_texture) {
-        printf("Unable to create texture from rendered text! SDL_Error: %s\n", SDL_GetError());
-        SDL_FreeSurface(text_surface);
-        TTF_CloseFont(font);
-        return -1;
-    }
 
-    // Calculate button dimensions with padding
-    int padding = button_properties->padding;
-    int button_width = text_surface->w + 2 * padding;
-    int button_height = text_surface->h + 2 * padding;
-	  // width for the invincible rect over button to dectect hover
-	  button_properties->rect1.w = button_width;
-	  button_properties->rect1.h = button_height;
-	        
-    // Shadow properties
-    int shadow_offset_w = 3;
-    int shadow_offset_h = 3;
+    int text_width, text_height;
+    SDL_QueryTexture(text_texture, NULL, NULL, &text_width, &text_height);
 
-    // Shadow color
-    Color shadow_color = {
-        button_properties->bcolor.r / 2,
-        button_properties->bcolor.g / 2,
-        button_properties->bcolor.b / 2,
-        button_properties->bcolor.a
-    };
+    // Calculate position for centering the text with padding
+    int text_x = button_rect.x + (button_rect.w - text_width) / 2;
+    int text_y = button_rect.y + (button_rect.h - text_height) / 2;
 
-    // Draw the shadow
-    sw_draw_rectangle(shadow_color, button_width + shadow_offset_w, button_height + shadow_offset_h,
-                   button_properties->x, button_properties->y, FILLED);
-    // Draw the button background rectangle
-    sw_draw_rectangle(button_properties->is_hovered ?button_properties->hover_color : button_properties->bcolor,
-                   button_width, button_height,
-                   button_properties->x, button_properties->y, FILLED);
+    SDL_Rect text_rect = {text_x, text_y, text_width, text_height};
+    SDL_RenderCopy(ren, text_texture, NULL, &text_rect);
 
-    // Set the text position with padding
-    SDL_Rect dst = {
-        button_properties->x + padding,
-        button_properties->y + padding,
-        text_surface->w,
-        text_surface->h
-    };
-    
-    
-    // Draw the new rect above button's rectangle for dectecting hover
-    SDL_RenderFillRect(ren, &button_properties->rect1);
-
-    
-    // Copy text texture to renderer
-    SDL_RenderCopy(ren, text_texture, NULL, &dst);
-
-    // Clean up
+    // Cleanup
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
-    TTF_CloseFont(font);
-
-    return 0;
+    TTF_CloseFont(font);  // Close the font
 }
 
-//---------------------------------- handle_button_hover()---------------------------------
-void sw_handle_button_hover(){
-
-	 for (int i = 0; i < widget_count; ++i) {
-        switch (widgets[i].type) {
-            case WIDGET_BUTTON:
-                sw_mouse_over_widgets((CREATE*)widgets[i].widget);
-                break;
-
-            default:
-                break;
+// Updated button_state function with event and button as arguments
+void sw_button_state(SDL_Event *event, CREATE *button) {
+    if (event->type == SDL_MOUSEMOTION) {
+        int mouse_x = event->motion.x;
+        int mouse_y = event->motion.y;
+        // Check if mouse is over button
+        if (mouse_x >= button->rect1.x && mouse_x <= button->rect1.x + button->rect1.w &&
+            mouse_y >= button->rect1.y && mouse_y <= button->rect1.y + button->rect1.h) {
+            button->is_hovered = 1;
+        } else {
+            button->is_hovered = 0;
+        }
+    } else if (event->type == SDL_MOUSEBUTTONDOWN) {
+        if (button->is_hovered) {
+            button->is_pressed = 1;
+        }
+    } else if (event->type == SDL_MOUSEBUTTONUP) {
+        button->is_pressed = 0;
+        if (button->is_hovered) {
+            button->is_clicked = 1;
+            printf("Button clicked!\n"); //to  be removed
         }
     }
 }
 
-
-
+void sw_render_all_button_states(SDL_Event *event) {
+    for (int i = 0; i < widget_count; ++i) {
+        if (widgets[i].type == WIDGET_BUTTON) {
+            sw_button_state(event, (CREATE*)widgets[i].widget);
+        }
+    }
+}
 
 //===============================LABELS============================================
 // Function to initialize Button with default values
@@ -671,12 +684,7 @@ void sw_render_widgets() {
                  case SDL_QUIT:
                      sw_active = false;  // User closed the window
                      break;
-                 case SDL_MOUSEBUTTONDOWN:
-                 //    handle_widget_clicks();  // Internal click handler for all widgets
-                     break;
-                 case SDL_MOUSEMOTION:
-                 	
-                    sw_handle_button_hover();  // Internal hover handler for buttons
+                 
                      break;
                  case SDL_WINDOWEVENT:
                      if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -686,6 +694,7 @@ void sw_render_widgets() {
                  default:
                      break;
              }
+             sw_render_all_button_states(&event);
          }
           sw_background(GRAY);
          sw_render_widgets();  // Render all widgets (handled by library)
