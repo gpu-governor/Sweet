@@ -1,4 +1,4 @@
-
+#define MAX_OPTIONS 5 // Maximum number of options for dropdown
 // GLOBAL VARIABLES
 const char* font_path = "assets/FreeMono.ttf";
 const int set = -1;
@@ -47,6 +47,11 @@ typedef struct {
     int type;
     // text box specific
     const char * place_holder;
+    
+        // Dropdown specific
+    bool expanded;
+    const char* options[MAX_OPTIONS];
+    int selected_index;
 } CREATE;
 
 typedef struct{
@@ -108,7 +113,8 @@ bool sw_button_pressed(CREATE *item){
 typedef enum {
     WIDGET_BUTTON,
     WIDGET_LABEL,
-    WIDGET_TEXT
+    WIDGET_TEXT,
+    WIDGET_DROP_DOWN
 } WidgetType;
 
 typedef struct {
@@ -552,6 +558,125 @@ int sw_render_label(const CREATE *label_properties) {
 
     return 0;
 }
+
+//=====================DROP====================
+
+#define BUTTON_WIDTH 200
+#define BUTTON_HEIGHT 40
+#define OPTION_HEIGHT 30
+
+CREATE sw_drop_down(int x, int y, const char* options[], int num_options) {
+    updateWindowSize();
+
+    CREATE new_drop_down;
+    new_drop_down.width = BUTTON_WIDTH;
+    new_drop_down.height = BUTTON_HEIGHT;
+    new_drop_down.expanded = false;
+    new_drop_down.selected_index = -1;
+
+    for (int i = 0; i < num_options && i < MAX_OPTIONS; ++i) {
+        new_drop_down.options[i] = options[i];
+    }
+
+    // Handle auto positioning
+    new_drop_down.x = (x == -1) ? layout_context.cursor_x : x;
+    new_drop_down.y = (y == -1) ? layout_context.cursor_y : y;
+
+    layout_context.cursor_y += BUTTON_HEIGHT + layout_context.padding;
+    
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    	sw_register_widget(WIDGET_DROP_DOWN, &new_drop_down);
+
+    return new_drop_down;
+}
+
+void sw_render_drop_down(CREATE *drop_down_properties) {
+    SDL_Rect buttonRect = {drop_down_properties->x, drop_down_properties->y, drop_down_properties->width, drop_down_properties->height};
+
+    // Draw the button
+    SDL_SetRenderDrawColor(ren, 100, 100, 255, 255);
+    SDL_RenderFillRect(ren, &buttonRect);
+
+    // Load font for dropdown text
+    TTF_Font *font = TTF_OpenFont(font_path, 16);
+    if (!font) {
+        printf("Failed to load font! TTF_Error: %s\n", TTF_GetError());
+        return;
+    }
+
+    // Selected option or default text
+    const char* display_text = (drop_down_properties->selected_index >= 0)
+        ? drop_down_properties->options[drop_down_properties->selected_index]
+        : "Select an option";
+
+    // Render the dropdown text
+    sw_render_text(&(CREATE){
+        .text = display_text,
+        .x = drop_down_properties->x + 10,
+        .y = drop_down_properties->y + 10,
+        .font_size = 16,
+        .color = WHITE,
+        .style = NORMAL
+    });
+
+    // Draw dropdown options if expanded
+    if (drop_down_properties->expanded) {
+        for (int i = 0; i < MAX_OPTIONS; ++i) {
+            SDL_Rect optionRect = {
+                drop_down_properties->x,
+                drop_down_properties->y + drop_down_properties->height + (i * OPTION_HEIGHT),
+                drop_down_properties->width, OPTION_HEIGHT
+            };
+            SDL_SetRenderDrawColor(ren, 200, 200, 200, 255);
+            SDL_RenderFillRect(ren, &optionRect);
+
+            sw_render_text(&(CREATE){
+                .text = drop_down_properties->options[i],
+                .x = optionRect.x + 10,
+                .y = optionRect.y + 5,
+                .font_size = 16,
+                .color = BLACK,
+                .style = NORMAL
+            });
+        }
+    }
+
+    TTF_CloseFont(font);
+}
+
+void drop_down_handle_event(CREATE* dropdown, SDL_Event* event) {
+    if (event->type == SDL_MOUSEBUTTONDOWN) {
+        int mouseX = event->button.x;
+        int mouseY = event->button.y;
+
+        // Toggle dropdown expansion
+        if (mouseX >= dropdown->x && mouseX <= dropdown->x + dropdown->width &&
+            mouseY >= dropdown->y && mouseY <= dropdown->y + dropdown->height) {
+            dropdown->expanded = !dropdown->expanded;
+        }
+        // Check if an option was clicked
+        else if (dropdown->expanded) {
+            for (int i = 0; i < MAX_OPTIONS; ++i) {
+                int optionY = dropdown->y + dropdown->height + (i * OPTION_HEIGHT);
+                if (mouseX >= dropdown->x && mouseX <= dropdown->x + dropdown->width &&
+                    mouseY >= optionY && mouseY <= optionY + OPTION_HEIGHT) {
+                    dropdown->selected_index = i;
+                    dropdown->expanded = false;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+void sw_render_all_drop_down_states(SDL_Event *event) {
+    for (int i = 0; i < widget_count; ++i) {
+        if (widgets[i].type == WIDGET_DROP_DOWN) {
+            drop_down_handle_event((CREATE*)widgets[i].widget, event);
+        }
+    }
+}
 //===============================SLIDERS============================================
 CREATE sw_slider(int type, float range,int x, int y, int font_size, int width, Color color, Color bcolor) {
 	CREATE new_slider;
@@ -668,6 +793,10 @@ void sw_render_widgets() {
             case WIDGET_TEXT:
                 sw_render_text((CREATE*)widgets[i].widget);
                 break;
+          case WIDGET_DROP_DOWN:
+                sw_render_drop_down((CREATE*)widgets[i].widget);
+                break;
+                
             // Add cases for other widget types here as you implement them
             default:
                 break;
@@ -695,6 +824,7 @@ void sw_render_widgets() {
                      break;
              }
              sw_render_all_button_states(&event);
+             sw_render_all_drop_down_states(&event);
          }
           sw_background(GRAY);
          sw_render_widgets();  // Render all widgets (handled by library)
