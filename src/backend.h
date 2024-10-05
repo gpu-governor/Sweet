@@ -10,7 +10,7 @@ SDL_Renderer *ren = NULL;
 SDL_Event event;
 SDL_Rect rect; // so for hover and pressed can detect mouse over widgets rect (buttons, ...) 
 
-bool active = true; // so you can use while (active) { // SDL events }
+bool sw_active = true; // so you can use while (active) { // SDL events }
 // layout context
 //  function to update the window size in the LayoutContext
 // Define the LayoutContext struct globally
@@ -32,7 +32,7 @@ Layout_context layout_context = { .cursor_x = 0, .cursor_y = 0, .padding = 5, .w
 //end layout context
 // =============INITIALIZATION, WINDOW, EVENTS===========================
 
-bool init(const char *title, int width, int height) {
+bool sw_init(const char *title, int width, int height) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2"); // "2" for anisotropic filtering
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -74,7 +74,7 @@ bool init(const char *title, int width, int height) {
     return true;
 }
 
-void quit() {
+void sw_quit() {
     if (ren) {
         SDL_DestroyRenderer(ren);
     }
@@ -118,7 +118,7 @@ typedef enum {
     OUTLINE
 } ShapeType;
 
-void draw_rectangle(Color color, int width, int height, int xpos, int ypos, ShapeType type) {
+void sw_draw_rectangle(Color color, int width, int height, int xpos, int ypos, ShapeType type) {
     rect.x = xpos; // X position
     rect.y = ypos; // Y position
     rect.w = width; // Width
@@ -133,7 +133,7 @@ void draw_rectangle(Color color, int width, int height, int xpos, int ypos, Shap
     }
 }
 
-void draw_triangle(Color color, int x1, int y1, int x2, int y2, int x3, int y3, ShapeType type) {
+void sw_draw_triangle(Color color, int x1, int y1, int x2, int y2, int x3, int y3, ShapeType type) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
 
     if (type == FILLED) {
@@ -160,7 +160,7 @@ void draw_triangle(Color color, int x1, int y1, int x2, int y2, int x3, int y3, 
     }
 }
 
-void draw_circle(Color color, int cx, int cy, int radius, ShapeType type) {
+void sw_draw_circle(Color color, int cx, int cy, int radius, ShapeType type) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
 
     if (type == FILLED) {
@@ -199,19 +199,19 @@ void draw_circle(Color color, int cx, int cy, int radius, ShapeType type) {
 
 // =====================CLEAR SCREEN, REFRESH AND PRESENT FUNCTION==========================
 
-void clear_screen(Color color) {
+void sw_clear_screen(Color color) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
     SDL_RenderClear(ren);
 }
 
-void present() {
+void sw_present() {
     SDL_RenderPresent(ren);
 }
 
 
 // =============IMG LOAD===========================
 
-void load_img(const char *path) {
+void sw_load_img(const char *path) {
     SDL_Surface *img = IMG_Load(path);
     if (img == NULL) {
         printf("IMG_Load Error: %s\n", IMG_GetError());
@@ -234,6 +234,6 @@ void load_img(const char *path) {
 
 
 // ===============BACKGROUND=====================
-void background(Color color){
-	clear_screen(color);
+void sw_background(Color color){
+	sw_clear_screen(color);
 }

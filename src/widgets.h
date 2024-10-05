@@ -59,7 +59,7 @@ typedef struct{
 //global
  int mouse_x;
  int mouse_y;
-bool mouse_over_widgets(CREATE *item) {
+bool sw_mouse_over_widgets(CREATE *item) {
 	 mouse_x = event.motion.x;
  	 mouse_y = event.motion.y;
     SDL_Point pt = {mouse_x, mouse_y};
@@ -74,7 +74,7 @@ bool mouse_over_widgets(CREATE *item) {
 
 }
 // clicked? may be deprecated for the pressed function
-bool clicked(CREATE *item) {
+bool sw_clicked(CREATE *item) {
 
     SDL_Point pt = {mouse_x, mouse_y};
     
@@ -86,7 +86,7 @@ bool clicked(CREATE *item) {
         return false;
     }
 }
-bool button_pressed(CREATE *item){
+bool sw_button_pressed(CREATE *item){
 	 mouse_x = event.motion.x;
  	 mouse_y = event.motion.y;
 	 SDL_Point pt = {mouse_x, mouse_y};
@@ -119,7 +119,7 @@ Widget widgets[MAX_WIDGETS];
 int widget_count = 0;
 
 
-void register_widget(WidgetType type, void* widget) {
+void sw_register_widget(WidgetType type, void* widget) {
 // this function is called internally when a new widgets is created
 /*
 When users call button(), label(), or text(), these will register their widgets internally:
@@ -146,7 +146,7 @@ Button button(parameters) {
 
 // ====================TEXT======================
 // Function to initialize Text with default values
-CREATE text(const char *text, int x, int y, int font_size, Color color, int style) {
+CREATE sw_text(const char *text, int x, int y, int font_size, Color color, int style) {
     // Update window size automatically
     updateWindowSize();
 
@@ -174,14 +174,14 @@ CREATE text(const char *text, int x, int y, int font_size, Color color, int styl
 
     
     // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
-    	register_widget(WIDGET_TEXT, &new_text);
+    	sw_register_widget(WIDGET_TEXT, &new_text);
     
     	//return new_widgets so it can be used in render 
         return new_text;
 }
 
 // Function to render text based on the Text structure
-int render_text(const CREATE *text_properties) {
+int sw_render_text(const CREATE *text_properties) {
     // Load font
     TTF_Font *font = TTF_OpenFont(font_path, text_properties->font_size);
     if (!font) {
@@ -223,7 +223,7 @@ int render_text(const CREATE *text_properties) {
     return 0;
 }
 // ------------------------------------complex text----------------------------
-CREATE complex_text(const char *text, int x, int y, int font_size, Color color, int style, int alignment, EFFECT effect) {
+CREATE sw_complex_text(const char *text, int x, int y, int font_size, Color color, int style, int alignment, EFFECT effect) {
     // Update window size automatically
     updateWindowSize();
 
@@ -258,7 +258,7 @@ CREATE complex_text(const char *text, int x, int y, int font_size, Color color, 
     return new_text;
 }
 //------------------------------------write-----------------------------
-CREATE write(int font_size,const char *text) {
+CREATE sw_write(int font_size,const char *text) {
     // Update window size automatically
     updateWindowSize();
 
@@ -296,7 +296,7 @@ CREATE write(int font_size,const char *text) {
 
 //===============================BUTTONS============================================
 // Function to initialize Button with default values
-CREATE button(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
+CREATE sw_button(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
     CREATE new_button;
     new_button.text = text;
     new_button.font_size = font_size;
@@ -336,7 +336,7 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
     layout_context.cursor_y += font_size + layout_context.padding;
 
 // registers button so sw_loop() can keep track of it, see render_widgets() for more details
-	register_widget(WIDGET_BUTTON, &new_button);
+	sw_register_widget(WIDGET_BUTTON, &new_button);
 
 	//return new_button so it can be used in render 
     return new_button;
@@ -344,7 +344,7 @@ CREATE button(const char *text, int x, int y, int font_size, Color color, Color 
 
 
 // Function to render button
-int render_button( CREATE *button_properties) {
+int sw_render_button( CREATE *button_properties) {
     // Load font
     TTF_Font *font = TTF_OpenFont(font_path, button_properties->font_size);
     if (!font) {
@@ -395,10 +395,10 @@ int render_button( CREATE *button_properties) {
     };
 
     // Draw the shadow
-    draw_rectangle(shadow_color, button_width + shadow_offset_w, button_height + shadow_offset_h,
+    sw_draw_rectangle(shadow_color, button_width + shadow_offset_w, button_height + shadow_offset_h,
                    button_properties->x, button_properties->y, FILLED);
     // Draw the button background rectangle
-    draw_rectangle(button_properties->is_hovered ?button_properties->hover_color : button_properties->bcolor,
+    sw_draw_rectangle(button_properties->is_hovered ?button_properties->hover_color : button_properties->bcolor,
                    button_width, button_height,
                    button_properties->x, button_properties->y, FILLED);
 
@@ -427,12 +427,12 @@ int render_button( CREATE *button_properties) {
 }
 
 //---------------------------------- handle_button_hover()---------------------------------
-void handle_button_hover(){
+void sw_handle_button_hover(){
 
 	 for (int i = 0; i < widget_count; ++i) {
         switch (widgets[i].type) {
             case WIDGET_BUTTON:
-                mouse_over_widgets((CREATE*)widgets[i].widget);
+                sw_mouse_over_widgets((CREATE*)widgets[i].widget);
                 break;
 
             default:
@@ -446,7 +446,7 @@ void handle_button_hover(){
 
 //===============================LABELS============================================
 // Function to initialize Button with default values
-CREATE label(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
+CREATE sw_label(const char *text, int x, int y, int font_size, Color color, Color bcolor, int style) {
 	// label is almost like button as in has text, background, ...
 	// but label does not hover on default and does not have shadow and dept
     CREATE new_label;
@@ -474,7 +474,7 @@ CREATE label(const char *text, int x, int y, int font_size, Color color, Color b
     layout_context.cursor_y += font_size + layout_context.padding;
 
     // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
-    	register_widget(WIDGET_LABEL, &new_label);
+    	sw_register_widget(WIDGET_LABEL, &new_label);
     
     	//return new_widgets so it can be used in render 
         return new_label;
@@ -482,7 +482,7 @@ CREATE label(const char *text, int x, int y, int font_size, Color color, Color b
 
 
 // Function to render button
-int render_label(const CREATE *label_properties) {
+int sw_render_label(const CREATE *label_properties) {
     // Load font
     TTF_Font *font = TTF_OpenFont(font_path, label_properties->font_size);
     if (!font) {
@@ -519,7 +519,7 @@ int render_label(const CREATE *label_properties) {
 
    
     // Draw the button background rectangle
-    draw_rectangle(label_properties->bcolor,label_width, label_height,label_properties->x, label_properties->y, FILLED);
+   sw_draw_rectangle(label_properties->bcolor,label_width, label_height,label_properties->x, label_properties->y, FILLED);
 
     // Set the text position with padding
     SDL_Rect dst = {
@@ -540,7 +540,7 @@ int render_label(const CREATE *label_properties) {
     return 0;
 }
 //===============================SLIDERS============================================
-CREATE slider(int type, float range,int x, int y, int font_size, int width, Color color, Color bcolor) {
+CREATE sw_slider(int type, float range,int x, int y, int font_size, int width, Color color, Color bcolor) {
 	CREATE new_slider;
     new_slider.type = type; 	// where type can be percentage, radian (360), 
     new_slider.font_size = font_size;
@@ -568,7 +568,7 @@ CREATE slider(int type, float range,int x, int y, int font_size, int width, Colo
     return new_slider;
 }
 
-int render_slider(const CREATE *slider_properties) {
+int sw_render_slider(const CREATE *slider_properties) {
     // Load font
     TTF_Font *font = TTF_OpenFont(font_path, slider_properties->font_size);
     if (!font) {
@@ -605,7 +605,7 @@ int render_slider(const CREATE *slider_properties) {
 
    
     // Draw the  background rectangle (Gauge)
-    draw_rectangle(slider_properties->bcolor,slider_width, slider_height,slider_properties->x, slider_properties->y, FILLED);
+    sw_draw_rectangle(slider_properties->bcolor,slider_width, slider_height,slider_properties->x, slider_properties->y, FILLED);
 
     // Set the text position with padding
     SDL_Rect dst = {
@@ -636,7 +636,7 @@ int render_slider(const CREATE *slider_properties) {
 
 
 //=====================RENDER ALL WIDGETS=============================
-void render_widgets() {
+void sw_render_widgets() {
 /*
  Key Steps for render_widgets():
  
@@ -647,13 +647,13 @@ void render_widgets() {
     for (int i = 0; i < widget_count; ++i) {
         switch (widgets[i].type) {
             case WIDGET_BUTTON:
-                render_button((CREATE*)widgets[i].widget);
+                sw_render_button((CREATE*)widgets[i].widget);
                 break;
             case WIDGET_LABEL:
-                render_label((CREATE*)widgets[i].widget);
+                sw_render_label((CREATE*)widgets[i].widget);
                 break;
             case WIDGET_TEXT:
-                render_text((CREATE*)widgets[i].widget);
+                sw_render_text((CREATE*)widgets[i].widget);
                 break;
             // Add cases for other widget types here as you implement them
             default:
@@ -664,19 +664,19 @@ void render_widgets() {
 
 //=====================================gui loop=================================================
  void sw_loop() {
-     while (active) {
+     while (sw_active) {
          SDL_Event event;
          while (SDL_PollEvent(&event)) {
              switch (event.type) {
                  case SDL_QUIT:
-                     active = false;  // User closed the window
+                     sw_active = false;  // User closed the window
                      break;
                  case SDL_MOUSEBUTTONDOWN:
                  //    handle_widget_clicks();  // Internal click handler for all widgets
                      break;
                  case SDL_MOUSEMOTION:
                  	
-                    handle_button_hover();  // Internal hover handler for buttons
+                    sw_handle_button_hover();  // Internal hover handler for buttons
                      break;
                  case SDL_WINDOWEVENT:
                      if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
@@ -687,8 +687,8 @@ void render_widgets() {
                      break;
              }
          }
-          background(GRAY);
-         render_widgets();  // Render all widgets (handled by library)
-         present();         // Present the rendered output
+          sw_background(GRAY);
+         sw_render_widgets();  // Render all widgets (handled by library)
+         sw_present();         // Present the rendered output
      }
  }
