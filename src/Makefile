@@ -1,5 +1,5 @@
 # Variables
-COMPILER = g++
+COMPILER = clang
 SOURCE_FILE = temp.c
 OUTPUT_FILE = main
 SDL_LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf
