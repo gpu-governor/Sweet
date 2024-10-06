@@ -590,6 +590,31 @@ CREATE sw_drop_down(int x, int y, const char* options[], int num_options) {
     return new_drop_down;
 }
 
+void sw_draw_filled_triangle_up(SDL_Renderer* renderer, int x1, int y1, int x2, int y2, int x3, int y3, SDL_Color color) {
+    // Set triangle color
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+    // Draw the filled triangle (upward)
+    for (int y = y3; y <= y1; y++) {
+        int startX = x3 + (x1 - x3) * (y - y3) / (y1 - y3);
+        int endX = x3 + (x2 - x3) * (y - y3) / (y2 - y3);
+        SDL_RenderDrawLine(renderer, startX, y, endX, y);  // Draw horizontal line
+    }
+}
+
+void sw_draw_filled_triangle_down(SDL_Renderer* renderer, int x1, int y1, int x2, int y2, int x3, int y3, SDL_Color color) {
+    // Set triangle color
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+
+    // Draw the filled triangle (downward)
+    for (int y = y1; y <= y3; y++) {
+        int startX = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+        int endX = x2 + (x3 - x2) * (y - y2) / (y3 - y2);
+        SDL_RenderDrawLine(renderer, startX, y, endX, y);  // Draw horizontal line
+    }
+}
+
+
 void sw_render_drop_down(CREATE *drop_down_properties) {
     SDL_Rect buttonRect = {drop_down_properties->x, drop_down_properties->y, drop_down_properties->width, drop_down_properties->height};
 
@@ -619,6 +644,21 @@ void sw_render_drop_down(CREATE *drop_down_properties) {
         .style = NORMAL
     });
 
+    // Calculate center of the dropdown for triangle placement
+    int centerX = drop_down_properties->x + drop_down_properties->width - 20;
+    int centerY = drop_down_properties->y + drop_down_properties->height / 2;
+
+    // Triangle color
+    SDL_Color triangleColor = {255, 255, 255, 255};  // White color
+
+    if (drop_down_properties->expanded) {
+        // Smaller triangle pointing upwards (expanded)
+        sw_draw_filled_triangle_up(ren, centerX - 4, centerY + 4, centerX + 4, centerY + 4, centerX, centerY - 4, triangleColor);
+    } else {
+        // Smaller triangle pointing downwards (collapsed)
+        sw_draw_filled_triangle_down(ren, centerX - 4, centerY - 4, centerX + 4, centerY - 4, centerX, centerY + 4, triangleColor);
+    }
+
     // Draw dropdown options if expanded
     if (drop_down_properties->expanded) {
         for (int i = 0; i < MAX_OPTIONS; ++i) {
@@ -643,6 +683,12 @@ void sw_render_drop_down(CREATE *drop_down_properties) {
 
     TTF_CloseFont(font);
 }
+
+
+
+
+
+
 
 void drop_down_handle_event(CREATE* dropdown, SDL_Event* event) {
     if (event->type == SDL_MOUSEBUTTONDOWN) {
