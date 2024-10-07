@@ -1,6 +1,6 @@
 # Variables
 COMPILER = clang
-SOURCE_FILE = ss.c
+SOURCE_FILE = radio.c
 OUTPUT_FILE = main
 SDL_LIBS = -lSDL2 -lSDL2_image -lSDL2_ttf
 STD_LIBS= -lm #maths.h

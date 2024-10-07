@@ -52,6 +52,9 @@ typedef struct {
     bool expanded;
     const char* options[MAX_OPTIONS];
     int selected_index;
+
+    //radio button specific
+    
 } CREATE;
 
 typedef struct{

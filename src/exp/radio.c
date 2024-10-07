@@ -8,7 +8,7 @@
 const char* font_path = "assets/FreeMono.ttf";
 
 typedef struct {
-    SDL_Rect rect;          // Rectangle for the radio button's position
+    SDL_Rect rect1;          // Rectangle for the radio button's position
     SDL_Color color;        // Color of the button when selected
     SDL_Color bcolor;       // Border color
     SDL_Color hover_color;  // Color when hovered
@@ -18,6 +18,7 @@ typedef struct {
     int x, y;               // Position
     int radius;             // Radius of the circle
     bool is_hovered;        // Is the button hovered
+    int font_size;          // Font size for the text
 } CREATE;
 
 // Function to draw a filled circle using SDL_Renderer
@@ -35,12 +36,12 @@ void sw_draw_circle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color 
     }
 }
 
-// Function to create a radio button
-CREATE sw_create_radio(int x, int y, int radius, SDL_Color color, SDL_Color bcolor, SDL_Color hover_color, SDL_Color text_color, const char *text) {
+// Function to create a radio button with smaller radius and font size parameter
+CREATE sw_create_radio(int x, int y, int radius, SDL_Color color, SDL_Color bcolor, SDL_Color hover_color, SDL_Color text_color, const char *text, int font_size) {
     CREATE radio;
     radio.x = x;
     radio.y = y;
-    radio.radius = radius;
+    radio.radius = radius; // Adjusted radius for smaller button size
     radio.color = color;
     radio.bcolor = bcolor;
     radio.hover_color = hover_color;
@@ -48,12 +49,13 @@ CREATE sw_create_radio(int x, int y, int radius, SDL_Color color, SDL_Color bcol
     radio.text = strdup(text);
     radio.is_selected = 0;
     radio.is_hovered = false;
+    radio.font_size = font_size; // Set font size
 
     return radio;
 }
 
-// Function to render a radio button
-void sw_render_radio(SDL_Renderer *renderer, TTF_Font *font, CREATE *radio) {
+// Modified rendering function with adjustable font size for radio buttons
+void sw_render_radio(SDL_Renderer *renderer, CREATE *radio) {
     // Get mouse position
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -69,9 +71,9 @@ void sw_render_radio(SDL_Renderer *renderer, TTF_Font *font, CREATE *radio) {
     // Draw outer circle (border)
     sw_draw_circle(renderer, radio->x, radio->y, radio->radius, radio->bcolor);
 
-    // Draw inner circle if selected
+    // Draw larger inner circle if selected (70% of the outer circle's radius)
     if (radio->is_selected) {
-        sw_draw_circle(renderer, radio->x, radio->y, radio->radius / 2, radio->color);
+        sw_draw_circle(renderer, radio->x, radio->y, (int)(radio->radius * 0.7), radio->color);
     }
 
     // Draw hover effect if hovered
@@ -79,13 +81,22 @@ void sw_render_radio(SDL_Renderer *renderer, TTF_Font *font, CREATE *radio) {
         sw_draw_circle(renderer, radio->x, radio->y, radio->radius - 2, radio->hover_color);
     }
 
-    // Render text next to the radio button
-    SDL_Surface *text_surface = TTF_RenderText_Solid(font, radio->text, radio->text_color);
+    // Load font with the specific size for the radio button
+    TTF_Font *font = TTF_OpenFont(font_path, radio->font_size);
+    if (font == NULL) {
+        printf("TTF_OpenFont Error: %s\n", TTF_GetError());
+        return;
+    }
+
+    // Render text
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, radio->text, radio->text_color);
     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
     SDL_Rect text_rect = {radio->x + radio->radius * 2, radio->y - text_surface->h / 2, text_surface->w, text_surface->h};
     SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+
     SDL_FreeSurface(text_surface);
     SDL_DestroyTexture(text_texture);
+    TTF_CloseFont(font); // Close font after rendering
 }
 
 // Function to handle radio button events
@@ -136,29 +147,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    TTF_Font *font = TTF_OpenFont(font_path, 24);
-    if (font == NULL) {
-        printf("TTF_OpenFont Error: %s\n", TTF_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
-    
-    // Create individual radio buttons (ungrouped)
+    // Create individual radio buttons (ungrouped) with font size
     SDL_Color color = {100, 100, 250, 255};
     SDL_Color bcolor = {0, 0, 0, 255};
     SDL_Color hover_color = {150, 150, 255, 255};
     SDL_Color text_color = {0, 0, 0, 255};
     
-    CREATE radio1 = sw_create_radio(100, 100, 15, color, bcolor, hover_color, text_color, "Option 1");
-    CREATE radio2 = sw_create_radio(100, 150, 15, color, bcolor, hover_color, text_color, "Option 2");
+    CREATE radio1 = sw_create_radio(100, 100, 12, color, bcolor, hover_color, text_color, "Option 1", 18);
+    CREATE radio2 = sw_create_radio(100, 150, 12, color, bcolor, hover_color, text_color, "Option 2", 18);
     
-    // Create grouped radio buttons
+    // Create grouped radio buttons with font size
     CREATE group_radios[3];
-    group_radios[0] = sw_create_radio(300, 100, 15, color, bcolor, hover_color, text_color, "Group Option A");
-    group_radios[1] = sw_create_radio(300, 150, 15, color, bcolor, hover_color, text_color, "Group Option B");
-    group_radios[2] = sw_create_radio(300, 200, 15, color, bcolor, hover_color, text_color, "Group Option C");
+    group_radios[0] = sw_create_radio(300, 100, 12, color, bcolor, hover_color, text_color, "Group Option A", 16);
+    group_radios[1] = sw_create_radio(300, 150, 12, color, bcolor, hover_color, text_color, "Group Option B", 16);
+    group_radios[2] = sw_create_radio(300, 200, 12, color, bcolor, hover_color, text_color, "Group Option C", 16);
 
     // Main loop
     bool quit = false;
@@ -183,12 +185,12 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(renderer);
         
         // Render individual radio buttons
-        sw_render_radio(renderer, font, &radio1);
-        sw_render_radio(renderer, font, &radio2);
+        sw_render_radio(renderer, &radio1);
+        sw_render_radio(renderer, &radio2);
         
         // Render grouped radio buttons
         for (int i = 0; i < 3; i++) {
-            sw_render_radio(renderer, font, &group_radios[i]);
+            sw_render_radio(renderer, &group_radios[i]);
         }
         
         // Present the backbuffer
@@ -196,7 +198,6 @@ int main(int argc, char *argv[]) {
     }
     
     // Cleanup
-    TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
