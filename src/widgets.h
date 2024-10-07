@@ -118,7 +118,8 @@ typedef enum {
     WIDGET_BUTTON,
     WIDGET_LABEL,
     WIDGET_TEXT,
-    WIDGET_DROP_DOWN
+    WIDGET_DROP_DOWN,
+    WIDGET_RADIO
 } WidgetType;
 
 typedef struct {
@@ -756,7 +757,10 @@ CREATE sw_create_radio(int x, int y, int radius, Color color, Color bcolor, Colo
     radio.is_selected = 0;
     radio.is_hovered = false; // on default
     radio.font_size = font_size; // Set font size
-
+	
+	
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    sw_register_widget(WIDGET_RADIO, &radio);
     return radio;
 }
 
@@ -847,6 +851,9 @@ void sw_render_widgets() {
                 break;
           case WIDGET_DROP_DOWN:
                 sw_render_drop_down((CREATE*)widgets[i].widget);
+                break;
+         case WIDGET_RADIO:
+                sw_render_radio((CREATE*)widgets[i].widget);
                 break;
                 
             // Add cases for other widget types here as you implement them
