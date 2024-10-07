@@ -56,6 +56,7 @@ typedef struct {
     //radio button specific
     int is_selected;        // Whether this radio button is selected
     int radius;             // Radius of the circle
+    int radio_type; // 1  for single, 0 for group
 } CREATE;
 
 typedef struct{
@@ -67,23 +68,7 @@ typedef struct{
 
 
 //===================RETAINED MODE SYSTEM==========================
-//global
- int mouse_x;
- int mouse_y;
-bool sw_mouse_over_widgets(CREATE *item) {
-	 mouse_x = event.motion.x;
- 	 mouse_y = event.motion.y;
-    SDL_Point pt = {mouse_x, mouse_y};
-    
-    if (SDL_PointInRect(&pt, &item->rect1)) {
-        item->is_hovered = true;
-        return true;
-    } else {
-        item->is_hovered = false;
-        return false;
-    }
-
-}
+int mouse_x, mouse_y;
 // clicked? may be deprecated for the pressed function
 bool sw_clicked(CREATE *item) {
 
@@ -97,20 +82,6 @@ bool sw_clicked(CREATE *item) {
         return false;
     }
 }
-bool sw_button_pressed(CREATE *item){
-	 mouse_x = event.motion.x;
- 	 mouse_y = event.motion.y;
-	 SDL_Point pt = {mouse_x, mouse_y};
-    
-    if (SDL_PointInRect(&pt, &item->rect1)) {
-        item->is_pressed = true;
-        return true;
-    } else {
-        item->is_pressed = false;
-        return false;
-    }
-}
-
 //----------------------------------------------
 
 
@@ -119,7 +90,8 @@ typedef enum {
     WIDGET_LABEL,
     WIDGET_TEXT,
     WIDGET_DROP_DOWN,
-    WIDGET_RADIO
+    WIDGET_RADIO,
+    WIDGET_RADIO_GROUP
 } WidgetType;
 
 typedef struct {
@@ -729,10 +701,7 @@ void sw_render_all_drop_down_states(SDL_Event *event) {
     }
 }
 //======================================RADIO===========================
-typedef enum {
-    RADIO_SINGLE,
-    RADIO_GROUP
-} RadioType;
+
 
 
 void sw_draw_circle_radio(int x, int y, int radius, Color color) {
@@ -767,6 +736,26 @@ CREATE sw_create_radio(int x, int y, int radius, Color color, Color bcolor, Colo
 	
     // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
     sw_register_widget(WIDGET_RADIO, &radio);
+    return radio;
+}
+// Function to create a radio button with smaller radius and font size parameter
+CREATE sw_create_radio_group(int x, int y, int radius, Color color, Color bcolor, Color hover_color, Color text_color, const char *text, int font_size) {
+    CREATE radio;
+    radio.x = x;
+    radio.y = y;
+    radio.radius = radius; // Adjusted radius for smaller button size
+    radio.color = color;
+    radio.bcolor = bcolor;
+    radio.hover_color = hover_color;
+    radio.color = text_color;
+    radio.text = strdup(text);
+    radio.is_selected = 0;
+    radio.is_hovered = false; // on default
+    radio.font_size = font_size; // Set font size
+	
+	
+    // registers widgets so sw_loop() can keep track of it, see render_widgets() for more details
+    sw_register_widget(WIDGET_RADIO_GROUP, &radio);
     return radio;
 }
 
@@ -817,6 +806,12 @@ void sw_render_radio(CREATE *radio) {
     TTF_CloseFont(font); // Close font after rendering
 }
 
+void sw_render_radio_group(CREATE *radio, int num){
+// this function just calls render_radio as for single button it uses the num parameter to loop
+	for (int i = 0; i < num; i++) {
+		sw_render_radio(radio);
+	}
+}
 // Function to handle radio button events
 void sw_handle_radio_event(SDL_Event *event, CREATE *radio) {
     if (event->type == SDL_MOUSEBUTTONDOWN && radio->is_hovered) {
@@ -836,18 +831,18 @@ void sw_handle_radio_group_event(SDL_Event *event, CREATE radios[], int num_radi
     }
 }
 
+//the two function below handles events for single and group radio buttons respectively
 void sw_handle_render_all_radio_states(SDL_Event *event) {
     for (int i = 0; i < widget_count; ++i) {
         if (widgets[i].type == WIDGET_RADIO) {
-            switch(RadioType){
-            	
-   case RADIO_SINGLE :
-   	     sw_handle_radio_event((CREATE*)widgets[i].widget, event);
-   	     break;
-    case RADIO_GROUP:
-	sw_handle_radio_event((CREATE*)widgets[i].widget, event);
-	break;    
-            }
+           	     sw_handle_radio_event((CREATE*)widgets[i].widget, event);
+       
+        }
+    }
+}void sw_handle_render_all_radio_group_states(SDL_Event *event) {
+    for (int i = 0; i < widget_count; ++i) {
+        if (widgets[i].type == WIDGET_RADIO) {
+           	     sw_handle_radio_event((CREATE*)widgets[i].widget, event);
        
         }
     }
@@ -877,6 +872,9 @@ void sw_render_widgets() {
                 break;
          case WIDGET_RADIO:
                 sw_render_radio((CREATE*)widgets[i].widget);
+                break;
+         case WIDGET_RADIO_GROUP:
+                sw_render_radio_group((CREATE*)widgets[i].widget,int num);
                 break;
                 
             // Add cases for other widget types here as you implement them

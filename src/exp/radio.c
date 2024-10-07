@@ -158,9 +158,9 @@ int main(int argc, char *argv[]) {
     
     // Create grouped radio buttons with font size
     CREATE group_radios[3];
-    group_radios[0] = sw_create_radio(300, 100, 12, color, bcolor, hover_color, text_color, "Group Option A", 16);
-    group_radios[1] = sw_create_radio(300, 150, 12, color, bcolor, hover_color, text_color, "Group Option B", 16);
-    group_radios[2] = sw_create_radio(300, 200, 12, color, bcolor, hover_color, text_color, "Group Option C", 16);
+    group_radios[0] = sw_create_radio(300, 100, 12, color, bcolor, hover_color, text_color,3, "Group Option A", 16);
+    group_radios[1] = sw_create_radio(300, 150, 12, color, bcolor, hover_color, text_color,3, "Group Option B", 16);
+    group_radios[2] = sw_create_radio(300, 200, 12, color, bcolor, hover_color, text_color,3 "Group Option C", 16);
 
     // Main loop
     bool quit = false;

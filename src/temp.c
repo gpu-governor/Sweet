@@ -35,9 +35,9 @@ int main() {
         
         // Create grouped radio buttons with font size
         CREATE group_radios[3];
-        group_radios[0] = sw_create_radio(500, 250, 12, BLUE, BLACK, BLUE, BLACK, "Group Option A", 16);
-        group_radios[1] = sw_create_radio(500, 300, 12, BLUE, BLACK, BLUE, BLACK, "Group Option B", 16);
-        group_radios[2] = sw_create_radio(500, 350, 12, BLUE, BLACK, BLUE, BLACK, "Group Option C", 16);
+        group_radios[0] = sw_create_radio_group(500, 250, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option A", 16);
+        group_radios[1] = sw_create_radio_group(500, 300, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option B", 16);
+        group_radios[2] = sw_create_radio_group(500, 350, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option C", 16);
     
 
    // writing this because i may forget, if a widgets is not showing up ensure it is registering
