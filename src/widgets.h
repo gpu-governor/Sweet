@@ -729,6 +729,12 @@ void sw_render_all_drop_down_states(SDL_Event *event) {
     }
 }
 //======================================RADIO===========================
+typedef enum {
+    RADIO_SINGLE,
+    RADIO_GROUP
+} RadioType;
+
+
 void sw_draw_circle_radio(int x, int y, int radius, Color color) {
     SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
     
@@ -829,6 +835,23 @@ void sw_handle_radio_group_event(SDL_Event *event, CREATE radios[], int num_radi
         }
     }
 }
+
+void sw_handle_render_all_radio_states(SDL_Event *event) {
+    for (int i = 0; i < widget_count; ++i) {
+        if (widgets[i].type == WIDGET_RADIO) {
+            switch(RadioType){
+            	
+   case RADIO_SINGLE :
+   	     sw_handle_radio_event((CREATE*)widgets[i].widget, event);
+   	     break;
+    case RADIO_GROUP:
+	sw_handle_radio_event((CREATE*)widgets[i].widget, event);
+	break;    
+            }
+       
+        }
+    }
+}
 //=====================RENDER ALL WIDGETS=============================
 void sw_render_widgets() {
 /*
@@ -884,7 +907,7 @@ void sw_render_widgets() {
              }
              sw_render_all_button_states(&event);
              sw_render_all_drop_down_states(&event);
-
+			sw_handle_render_all_radio_states(&event);
          }
           sw_background(GRAY);
          sw_render_widgets();  // Render all widgets (handled by library)
