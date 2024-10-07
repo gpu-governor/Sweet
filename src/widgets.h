@@ -885,12 +885,6 @@ void sw_render_widgets() {
              sw_render_all_button_states(&event);
              sw_render_all_drop_down_states(&event);
 
-             // Handle individual radio buttons
-                         sw_handle_radio_event(&event, &radio1);
-                         sw_handle_radio_event(&event, &radio2);
-                         
-                         // Handle grouped radio buttons
-                         sw_handle_radio_group_event(&event, group_radios, 3);
          }
           sw_background(GRAY);
          sw_render_widgets();  // Render all widgets (handled by library)
