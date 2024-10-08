@@ -133,69 +133,6 @@ void sw_draw_rectangle(Color color, int width, int height, int xpos, int ypos, S
     }
 }
 
-void sw_draw_triangle(Color color, int x1, int y1, int x2, int y2, int x3, int y3, ShapeType type) {
-    SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
-
-    if (type == FILLED) {
-        int minX = SDL_min(x1, SDL_min(x2, x3));
-        int maxX = SDL_max(x1, SDL_max(x2, x3));
-        int minY = SDL_min(y1, SDL_min(y2, y3));
-        int maxY = SDL_max(y1, SDL_max(y2, y3));
-
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                int w0 = (x - x2) * (y1 - y2) - (x1 - x2) * (y - y2);
-                int w1 = (x - x3) * (y2 - y3) - (x2 - x3) * (y - y3);
-                int w2 = (x - x1) * (y3 - y1) - (x3 - x1) * (y - y1);
-
-                if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-                    SDL_RenderDrawPoint(ren, x, y);
-                }
-            }
-        }
-    } else if (type == OUTLINE) {
-        SDL_RenderDrawLine(ren, x1, y1, x2, y2);
-        SDL_RenderDrawLine(ren, x2, y2, x3, y3);
-        SDL_RenderDrawLine(ren, x3, y3, x1, y1);
-    }
-}
-
-void sw_draw_circle(Color color, int cx, int cy, int radius, ShapeType type) {
-    SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
-
-    if (type == FILLED) {
-        for (int w = 0; w < radius * 2; w++) {
-            for (int h = 0; h < radius * 2; h++) {
-                int dx = radius - w; // horizontal offset
-                int dy = radius - h; // vertical offset
-                if ((dx * dx + dy * dy) <= (radius * radius)) {
-                    SDL_RenderDrawPoint(ren, cx + dx, cy + dy);
-                }
-            }
-        }
-    } else if (type == OUTLINE) {
-        int d = 3 - 2 * radius;
-        int x = 0, y = radius;
-
-        while (y >= x) {
-            SDL_RenderDrawPoint(ren, cx + x, cy + y);
-            SDL_RenderDrawPoint(ren, cx - x, cy + y);
-            SDL_RenderDrawPoint(ren, cx + x, cy - y);
-            SDL_RenderDrawPoint(ren, cx - x, cy - y);
-            SDL_RenderDrawPoint(ren, cx + y, cy + x);
-            SDL_RenderDrawPoint(ren, cx - y, cy + x);
-            SDL_RenderDrawPoint(ren, cx + y, cy - x);
-            SDL_RenderDrawPoint(ren, cx - y, cy - x);
-            x++;
-            if (d > 0) {
-                y--;
-                d = d + 4 * (x - y) + 10;
-            } else {
-                d = d + 4 * x + 6;
-            }
-        }
-    }
-}
 
 // =====================CLEAR SCREEN, REFRESH AND PRESENT FUNCTION==========================
 
@@ -208,32 +145,6 @@ void sw_present() {
     SDL_RenderPresent(ren);
 }
 
-
-// =============IMG LOAD===========================
-
-void sw_load_img(const char *path) {
-    SDL_Surface *img = IMG_Load(path);
-    if (img == NULL) {
-        printf("IMG_Load Error: %s\n", IMG_GetError());
-        return;
-    }
-
-    SDL_Texture *temp_tex = SDL_CreateTextureFromSurface(ren, img);
-    if (temp_tex == NULL) {
-        printf("SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
-        SDL_FreeSurface(img);
-        return;
-    }
-
-    SDL_RenderCopy(ren, temp_tex, NULL, NULL);
-    SDL_RenderPresent(ren);
-
-    SDL_DestroyTexture(temp_tex);
-    SDL_FreeSurface(img);
-}
-
-
-// ===============BACKGROUND=====================
 void sw_background(Color color){
 	sw_clear_screen(color);
 }

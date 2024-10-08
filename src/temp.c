@@ -1,15 +1,4 @@
-#include <SDL2/SDL.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-// local includes
-#include "backend.h"
-#include"widgets.h"
+#include"sweet.h"
 
 int main() {
    sw_init("Gui", 800, 700);
@@ -29,17 +18,18 @@ int main() {
     CREATE dropdown = sw_drop_down(450, 100, options, 5);
 
     //radio buttons
-        
+     /*   
         CREATE radio1 = sw_create_radio(300, 250, 12, BLUE, BLACK, BLUE, BLACK, "Option 1", 18);
         CREATE radio2 = sw_create_radio(300, 300, 12, BLUE, BLACK, BLUE, BLACK, "Option 2", 18);
         
-        // Create grouped radio buttons with font size
-        CREATE group_radios[3];
-        group_radios[0] = sw_create_radio_group(500, 250, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option A", 16);
-        group_radios[1] = sw_create_radio_group(500, 300, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option B", 16);
-        group_radios[2] = sw_create_radio_group(500, 350, 12, BLUE, BLACK, BLUE, BLACK,3, "Group Option C", 16);
+        // Create grouped radio buttons with font size, and set sentinel value for last element
+        CREATE group_radios[4]; // One extra for sentinel
+        group_radios[0] = sw_create_radio(300, 100, 12,BLUE, BLACK, BLUE, BLACK,"Group Option A", 16);
+        group_radios[1] = sw_create_radio(300, 150, 12, BLUE, BLACK, BLUE, BLACK, "Group Option B", 16);
+        group_radios[2] = sw_create_radio(300, 200, 12,BLUE, BLACK, BLUE, BLACK, "Group Option C", 16);
+        group_radios[3].is_end = true; // Set the sentinel flag for end of group
     
-
+*/
    // writing this because i may forget, if a widgets is not showing up ensure it is registering
    
     // Main GUI loop (handled by library)
