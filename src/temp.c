@@ -1,3 +1,11 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include"sweet.h"
 
 int main() {
@@ -17,19 +25,7 @@ int main() {
     const char* options[] = {"Option 1", "Option 2", "Option 3", "Option 4", "Option 5"};
     CREATE dropdown = sw_drop_down(450, 100, options, 5);
 
-    //radio buttons
-     /*   
-        CREATE radio1 = sw_create_radio(300, 250, 12, BLUE, BLACK, BLUE, BLACK, "Option 1", 18);
-        CREATE radio2 = sw_create_radio(300, 300, 12, BLUE, BLACK, BLUE, BLACK, "Option 2", 18);
-        
-        // Create grouped radio buttons with font size, and set sentinel value for last element
-        CREATE group_radios[4]; // One extra for sentinel
-        group_radios[0] = sw_create_radio(300, 100, 12,BLUE, BLACK, BLUE, BLACK,"Group Option A", 16);
-        group_radios[1] = sw_create_radio(300, 150, 12, BLUE, BLACK, BLUE, BLACK, "Group Option B", 16);
-        group_radios[2] = sw_create_radio(300, 200, 12,BLUE, BLACK, BLUE, BLACK, "Group Option C", 16);
-        group_radios[3].is_end = true; // Set the sentinel flag for end of group
-    
-*/
+
    // writing this because i may forget, if a widgets is not showing up ensure it is registering
    
     // Main GUI loop (handled by library)
