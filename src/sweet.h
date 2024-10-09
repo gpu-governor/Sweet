@@ -199,9 +199,7 @@ typedef struct {
     int height; // Height of the button
     // slider specific
     int type;
-    // text box specific
-    const char * place_holder;
-    
+
         // Dropdown specific
     bool expanded;
     const char* options[MAX_OPTIONS];
@@ -215,6 +213,18 @@ typedef struct {
     int range;           
     float value;          
     bool is_dragging;            // Flag to indicate the end of a group
+
+    //text entry
+    char *entry_text;
+    Color placeholder_color;  // Color for the placeholder text
+    Color outline_color;  // Outline color for the text box
+    Color outline_color_selected; // Outline color when selected
+    char *place_holder; // Placeholder text for the text box
+    bool active;        // Track if the text box is active or clicked
+    int cursor_position; // Cursor position for text input
+    bool show_cursor;    // Flag to control blinking cursor
+    Uint32 last_cursor_blink_time; // Time tracking for cursor blinking
+    int text_scroll_offset;  // Horizontal offset to enable text scrolling
 } CREATE;
 
 typedef struct{
@@ -250,7 +260,8 @@ typedef enum {
     WIDGET_DROP_DOWN,
     WIDGET_SLIDER,
     WIDGET_RADIO,
-    WIDGET_RADIO_GROUP
+    WIDGET_RADIO_GROUP,
+    WIDGET_ENTRY
 } WidgetType;
 
 typedef struct {
@@ -960,6 +971,178 @@ void sw_render_all_slider_states(SDL_Event *event) {
     }
 }
 
+//=======================================ENTRY====================================================
+// Function to create a text box widget
+CREATE sw_text_entry(int x, int y, int w, int h, const char *placeholder, int font_size, Color text_color, Color placeholder_color, Color bg_color, Color outline_color, Color outline_color_selected, int style) {
+    CREATE text_entry;
+    text_entry.rect1.x = x;
+    text_entry.rect1.y = y;
+    text_entry.rect1.w = w;
+    text_entry.rect1.h = h;
+    text_entry.entry_text = malloc(256);  // Allocate memory for the text
+    text_entry.entry_text[0] = '\0';      // Start with an empty string
+    text_entry.font_size = font_size;
+    text_entry.color = text_color;
+    text_entry.placeholder_color = placeholder_color;
+    text_entry.bcolor = bg_color;
+    text_entry.outline_color = outline_color;
+    text_entry.outline_color_selected = outline_color_selected;
+    text_entry.style = style;
+    text_entry.padding = 5;         // Default padding
+    text_entry.width = w;
+    text_entry.height = h;
+    text_entry.place_holder = (char *)placeholder;
+    text_entry.active = false;
+    text_entry.cursor_position = 0;
+    text_entry.show_cursor = true;
+    text_entry.last_cursor_blink_time = SDL_GetTicks();
+    text_entry.text_scroll_offset = 0;  // Initialize scroll offset
+
+    sw_register_widget(WIDGET_ENTRY, &text_entry);
+    return text_entry;
+}
+
+// Function to render the text box widget
+void sw_render_text_entry(CREATE *text_entry) {
+    // Draw the background (the box)
+    SDL_SetRenderDrawColor(ren, text_entry->bcolor.r, text_entry->bcolor.g, text_entry->bcolor.b, text_entry->bcolor.a);
+    SDL_RenderFillRect(ren, &text_entry->rect1);
+
+    // Draw the outline (light for inactive, dark for active)
+    Color currentOutlineColor = text_entry->active ? text_entry->outline_color_selected : text_entry->outline_color;
+    SDL_SetRenderDrawColor(ren, currentOutlineColor.r, currentOutlineColor.g, currentOutlineColor.b, currentOutlineColor.a);
+    SDL_RenderDrawRect(ren, &text_entry->rect1);
+
+    const char *displayText;
+    Color currentColor;
+
+    // If no text has been entered, display the placeholder text in pale color
+    if (strlen(text_entry->text) == 0) {
+        displayText = text_entry->place_holder;
+        currentColor = text_entry->placeholder_color;
+    } else {
+        displayText = text_entry->text;
+        currentColor = text_entry->color;
+    }
+
+	TTF_Font *font = TTF_OpenFont(font_path, text_entry->font_size);
+	if (!font) {
+	    printf("Failed to load font: %s\n", TTF_GetError());
+	}
+	
+	
+    // Render the text (or placeholder)
+    SDL_Surface *textSurface = TTF_RenderText_Blended(font, displayText, (SDL_Color){currentColor.r, currentColor.g, currentColor.b, currentColor.a});
+    if (!textSurface) {
+        printf("Failed to create text surface: %s\n", TTF_GetError());
+        return;
+    }
+    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(ren, textSurface);
+    if (!textTexture) {
+        printf("Failed to create text texture: %s\n", SDL_GetError());
+        SDL_FreeSurface(textSurface);
+        return;
+    }
+    int text_width, text_height;
+    SDL_QueryTexture(textTexture, NULL, NULL, &text_width, &text_height);
+
+    // Define the clipping area to ensure text doesn't overflow the box
+    SDL_Rect clipRect = {
+        text_entry->rect1.x + text_entry->padding,
+        text_entry->rect1.y + text_entry->padding,
+        text_entry->width - 2 * text_entry->padding,
+        text_entry->height - 2 * text_entry->padding
+    };
+    SDL_RenderSetClipRect(ren, &clipRect);  // Set the clipping region
+
+    // Scroll the text horizontally if it exceeds the text box width
+    int max_text_visible_width = text_entry->width - 2 * text_entry->padding;
+    if (text_width > max_text_visible_width) {
+        text_entry->text_scroll_offset = text_width - max_text_visible_width;
+    } else {
+        text_entry->text_scroll_offset = 0;
+    }
+
+    SDL_Rect textRect = {
+        text_entry->rect1.x + text_entry->padding - text_entry->text_scroll_offset,  // Apply scroll offset
+        text_entry->rect1.y + (text_entry->height - text_height) / 2,  // Vertically center the text
+        text_width, text_height
+    };
+    SDL_RenderCopy(ren, textTexture, NULL, &textRect);
+
+    // Render the blinking cursor if the text box is active
+    if (text_entry->active && text_entry->show_cursor) {
+        // Cursor should be positioned after the visible text, relative to scroll offset
+        int cursor_x;
+        if (strlen(text_entry->text) == 0) {
+            cursor_x = text_entry->rect1.x + text_entry->padding;  // Start at the beginning if no text
+        } else {
+            int cursor_position_x = text_entry->rect1.x + text_entry->padding + text_width;
+            cursor_x = cursor_position_x - text_entry->text_scroll_offset;  // Adjust based on scroll
+        }
+        int cursor_y = textRect.y;  // Align with the y-position of the text
+        SDL_SetRenderDrawColor(ren, text_entry->color.r, text_entry->color.g, text_entry->color.b, 255);
+        SDL_RenderDrawLine(ren, cursor_x, cursor_y, cursor_x, cursor_y + text_height);  // Adjust cursor height to match text height
+    }
+
+    SDL_RenderSetClipRect(ren, NULL);  // Disable clipping
+
+    SDL_DestroyTexture(textTexture);
+    SDL_FreeSurface(textSurface);
+}
+
+// Function to handle text box input
+void sw_handle_input(CREATE *text_entry, SDL_Event *e) {
+    if (e->type == SDL_MOUSEBUTTONDOWN) {
+        // Check if mouse is within the text box
+        int mouseX = e->button.x;
+        int mouseY = e->button.y;
+        if (mouseX >= text_entry->rect1.x && mouseX <= text_entry->rect1.x + text_entry->width &&
+            mouseY >= text_entry->rect1.y && mouseY <= text_entry->rect1.y + text_entry->height) {
+            text_entry->active = true;
+        } else {
+            text_entry->active = false;
+        }
+    } else if (e->type == SDL_TEXTINPUT && text_entry->active) {
+        // Append new text to the text box's text
+        strcat(text_entry->entry_text, e->text.text);
+        text_entry->cursor_position++;
+
+		TTF_Font *font = TTF_OpenFont(font_path, text_entry->font_size);
+		if (!font) {
+		    printf("Failed to load font: %s\n", TTF_GetError());
+		}
+
+
+        // Update the scroll offset if needed
+        int text_width;
+        TTF_SizeText(font, text_entry->text, &text_width, NULL);
+        int max_text_visible_width = text_entry->width - 2 * text_entry->padding;
+        if (text_width > max_text_visible_width) {
+            text_entry->text_scroll_offset = text_width - max_text_visible_width;
+        }
+    } else if (e->type == SDL_KEYDOWN && text_entry->active) {
+        // Handle backspace
+        if (e->key.keysym.sym == SDLK_BACKSPACE && text_entry->cursor_position > 0) {
+            text_entry->entry_text[text_entry->cursor_position - 1] = '\0';
+            text_entry->cursor_position--;
+        }
+    }
+
+    // Handle cursor blinking
+    if (SDL_GetTicks() - text_entry->last_cursor_blink_time >= 500) {
+        text_entry->show_cursor = !text_entry->show_cursor;
+        text_entry->last_cursor_blink_time = SDL_GetTicks();
+    }
+}
+
+void sw_render_all_entry_states(SDL_Event *event) {
+    for (int i = 0; i < widget_count; ++i) {
+        if (widgets[i].type == WIDGET_ENTRY) {
+            sw_handle_input((CREATE*)widgets[i].widget, event);
+        }
+    }
+}
 //=====================RENDER ALL WIDGETS=============================
 void sw_render_widgets() {
 /*
@@ -992,6 +1175,9 @@ void sw_render_widgets() {
          case WIDGET_SLIDER:
              
                 sw_render_slider((CREATE*)widgets[i].widget);
+                break; 
+         case WIDGET_ENTRY:
+             	sw_render_text_entry((CREATE*)widgets[i].widget);
                 break;
             // Add cases for other widget types here as you implement them
             default:
@@ -1025,7 +1211,8 @@ void sw_render_widgets() {
              sw_render_all_drop_down_states(&event);
 			//slider
 			sw_render_all_slider_states(&event);
-            
+            //entry
+            sw_render_all_entry_states(&event);
         
          }
           sw_background(GRAY);

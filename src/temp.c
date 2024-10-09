@@ -16,7 +16,8 @@ int main() {
    CREATE my_button1 = sw_button("click me", 2, 200, h4, WHITE, BLUE, BOLD);
    CREATE my_button2 = sw_button("click me", 2, 300, h4, WHITE, GREEN, BOLD);   
    CREATE my_button3 = sw_button("light", 2, 400, h4, BLACK, YELLOW, BOLD);
-   
+   //text field
+   CREATE textBox=sw_text_entry(150, 150, 500, 50, "Enter text here...",24, BLACK, GRAY, WHITE, BLACK, GRAY, NORMAL);
    // text based
    CREATE my_label = sw_label("This is a Label", 0, 30, h1, BLACK, BLUE, BOLD);
    CREATE my_text = sw_text("haha hi, you've been on my mind", 0, 2, h3, WHITE,BOLD);
