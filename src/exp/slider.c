@@ -8,6 +8,7 @@ const char* font_path = "assets/FreeMono.ttf";
 
 // Slider struct with required properties
 typedef struct {
+    int font_size;
     SDL_Rect panel_rect;    // Rect for the slider panel (background)
     SDL_Rect thumb_rect;    // Rect for the slider thumb
     SDL_Color panel_color;  // Color of the panel
@@ -23,7 +24,7 @@ typedef struct {
 } Slider;
 
 // Function to create a slider
-Slider sw_slider(int x, int y, int width, int height, float range, SDL_Color panel_color, SDL_Color thumb_color, SDL_Color hover_color, SDL_Color text_color) {
+Slider sw_slider(int x, int y, int width, int height, float range, SDL_Color panel_color, SDL_Color thumb_color, SDL_Color hover_color, SDL_Color text_color, int font_size) {
     Slider slider;
     slider.x = x;
     slider.y = y;
@@ -31,6 +32,7 @@ Slider sw_slider(int x, int y, int width, int height, float range, SDL_Color pan
     slider.height = height;
     slider.range = range;
     slider.value = 0.0f; // Start from 0 (beginning)
+    slider.font_size=font_size;
     
     // Initialize panel (background)
     slider.panel_rect.x = x;
@@ -55,23 +57,30 @@ Slider sw_slider(int x, int y, int width, int height, float range, SDL_Color pan
 }
 
 // Function to render the slider
-void sw_render_slider(SDL_Renderer *renderer, TTF_Font *font, Slider *slider) {
+void sw_render_slider(SDL_Renderer *renderer, Slider *slider) {
+    // Load the font each time you render
+    TTF_Font *font = TTF_OpenFont(font_path, slider->font_size);
+    if (font == NULL) {
+        printf("TTF_OpenFont Error: %s\n", TTF_GetError());
+        return; // Exit the function if the font fails to load
+    }
+
     // Draw the panel (background)
     SDL_SetRenderDrawColor(renderer, slider->panel_color.r, slider->panel_color.g, slider->panel_color.b, slider->panel_color.a);
     SDL_RenderFillRect(renderer, &slider->panel_rect);
-    
+
     // Determine if thumb is hovered
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
     bool thumb_hovered = (mouse_x >= slider->thumb_rect.x && mouse_x <= (slider->thumb_rect.x + slider->thumb_rect.w) &&
                           mouse_y >= slider->thumb_rect.y && mouse_y <= (slider->thumb_rect.y + slider->thumb_rect.h));
-    
+
     if (thumb_hovered || slider->is_dragging) {
         slider->is_hovered = true;
     } else {
         slider->is_hovered = false;
     }
-    
+
     // Draw the thumb (change color if hovered)
     if (slider->is_hovered) {
         SDL_SetRenderDrawColor(renderer, slider->hover_color.r, slider->hover_color.g, slider->hover_color.b, slider->hover_color.a);
@@ -83,12 +92,31 @@ void sw_render_slider(SDL_Renderer *renderer, TTF_Font *font, Slider *slider) {
     // Render text showing the value
     char text[32];
     sprintf(text, "%d", (int)slider->value);
-    SDL_Surface *text_surface = TTF_RenderText_Solid(font, text, slider->text_color);
+
+    // Set font to bold
+    TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+
+    // Use Blended text for sharper rendering
+    SDL_Surface *text_surface = TTF_RenderText_Blended(font, text, slider->text_color);
+    if (text_surface == NULL) {
+        printf("TTF_RenderText Error: %s\n", TTF_GetError());
+        TTF_CloseFont(font);  // Make sure to close the font before returning
+        return;
+    }
+
     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    SDL_Rect text_rect = {slider->x + slider->width / 2 - text_surface->w / 2, slider->y + slider->height / 2 - text_surface->h / 2, text_surface->w, text_surface->h};
-    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+    if (text_texture == NULL) {
+        printf("SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
+    } else {
+        SDL_Rect text_rect = {slider->x + slider->width / 2 - text_surface->w / 2, slider->y + slider->height / 2 - text_surface->h / 2, text_surface->w, text_surface->h};
+        SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+        SDL_DestroyTexture(text_texture);
+    }
+
     SDL_FreeSurface(text_surface);
-    SDL_DestroyTexture(text_texture);
+    
+    // Close the font after rendering
+    TTF_CloseFont(font);
 }
 
 // Function to handle slider events
@@ -164,7 +192,7 @@ int main(int argc, char *argv[]) {
     SDL_Color hover_color = {150, 150, 255, 255};
     SDL_Color text_color = {0, 0, 0, 255};
     
-    Slider slider = sw_slider(100, 200, 400, 20, 100.0f, panel_color, thumb_color, hover_color, text_color);
+    Slider slider = sw_slider(100, 200, 400, 20, 100.0f, panel_color, thumb_color, hover_color, text_color, 24);
     
     // Main loop
     bool quit = false;
@@ -181,11 +209,11 @@ int main(int argc, char *argv[]) {
         }
         
         // Clear screen
-        SDL_SetRenderDrawColor(renderer, 0, 25, 255, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 25, 99, 255);
         SDL_RenderClear(renderer);
         
         // Render slider
-        sw_render_slider(renderer, font, &slider);
+        sw_render_slider(renderer,  &slider);
         
         // Present the backbuffer
         SDL_RenderPresent(renderer);

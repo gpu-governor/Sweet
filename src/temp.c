@@ -24,7 +24,9 @@ int main() {
    // drop down
     const char* options[] = {"Option 1", "Option 2", "Option 3", "Option 4", "Option 5"};
     CREATE dropdown = sw_drop_down(450, 100, options, 5);
+// slider
 
+    CREATE slider = sw_slider(100, 500, 400, 20, 100.0f, WHITE, BLACK, PINK, YELLOW, 24);
 
    // writing this because i may forget, if a widgets is not showing up ensure it is registering
    
